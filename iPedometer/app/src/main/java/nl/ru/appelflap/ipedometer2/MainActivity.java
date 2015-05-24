@@ -5,15 +5,14 @@ import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Message;
 import android.os.SystemClock;
 import android.util.Log;
 import android.view.View;
 import android.widget.CheckBox;
-import android.widget.EditText;
 import android.widget.Toast;
 
-import java.util.logging.Handler;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import nl.ru.appelflap.ipedometer2.R;
 
@@ -85,7 +84,31 @@ public class MainActivity extends Activity {
                                 + resultUri
                         , Toast.LENGTH_LONG).show();
                 // START NEW ACTIVITY "PROFILE"
+                String authorization = "";
+                if (resultUri.getQueryParameterNames().contains("code")) {
+                    authorization = resultUri.getQueryParameter("code");
+                }
+                Log.d("MainActivity", authorization);
+                String profile = "https://api.moves-app.com/oauth/v1/access_token?grant_type=authorization_code&code=" + authorization + "&client_id=" + CLIENT_ID + "&client_secret=" + R.string.clientsecret + "&redirect_uri=" + REDIRECT_URI;
+                Json json = new Json(profile, false, authorization);
+                new Thread(json).start();
+                try {
+                    Thread.sleep(2000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                JSONObject access = json.getJSONObject();
+                String access_token = "";
+                try {
+                    access_token = access.getString("access_token");
+                    Log.d("MainActivityAccess", access_token);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                Log.d("MainActivityTest", access_token);
+
                 Intent intent = new Intent(this, Profile.class);
+                intent.putExtra("access_token", access_token);
                 startActivity(intent);
         }
 

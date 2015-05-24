@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -53,8 +54,10 @@ public class Profile extends ActionBarActivity {
         //CalendarIntegration ci = new CalendarIntegration(this);
         setContentView(R.layout.activity_profile);
         //Log.d("app", "Profile OnCreate");
-        String profile = getString(R.string.baseurl) + getString(R.string.profile);
-        Json json = new Json(profile);
+        Intent myIntent = this.getIntent();
+        Log.d("ProfileIntent", myIntent.getStringExtra("access_token"));
+        String profile = getString(R.string.baseurl) + getString(R.string.profile) + myIntent.getStringExtra("access_token");
+        Json json = new Json(profile, true);
         new Thread(json).start();
 
         //CalendarIntegration ci = new CalendarIntegration(this);
