@@ -1,5 +1,6 @@
 package iPedometer3;
 
+import java.util.Dictionary;
 import java.util.LinkedList;
 import java.util.Random;
 
@@ -14,13 +15,17 @@ public class MessageGenerator {
     private LinkedList<PersuasivePart> consensusMessages;
     private LinkedList<PersuasivePart> funnyMessages;
 
-    public MessageGenerator()
+    private RandomCollection<PersuasionType> userSusceptibilityScores;
+
+    public MessageGenerator(RandomCollection<PersuasionType> userSusceptibilityScores)
     {
         authorityMessages = new LinkedList<PersuasivePart>();
         scarcityMessages = new LinkedList<PersuasivePart>();
         commitmentMessages = new LinkedList<PersuasivePart>();
         consensusMessages = new LinkedList<PersuasivePart>();
         funnyMessages = new LinkedList<PersuasivePart>();
+
+        this.userSusceptibilityScores = userSusceptibilityScores;
 
         loadMessages();
     }
@@ -45,23 +50,32 @@ public class MessageGenerator {
                         PersuasionType.FUNNY));
     }
 
-    public PersuasiveMessage generateMessage(PersuasionType type, String activityPart)
+    public PersuasiveMessage generateMessage(String activityPart)
     {
         Random random = new Random();
-        int randomIndex = random.nextInt(consensusMessages.size());
+        int randomIndex = 0;
         PersuasivePart msg;
+
+        PersuasionType type = userSusceptibilityScores.takeWeightedSample();
+
         switch(type) {
             case CONSENSUS:
+                randomIndex = random.nextInt(consensusMessages.size());
                 msg = consensusMessages.get(randomIndex); break;
             case COMMITMENT:
+                randomIndex = random.nextInt(commitmentMessages.size());
                 msg = commitmentMessages.get(randomIndex); break;
             case AUTHORITY:
+                randomIndex = random.nextInt(authorityMessages.size());
                 msg = authorityMessages.get(randomIndex); break;
             case FUNNY:
+                randomIndex = random.nextInt(funnyMessages.size());
                 msg = funnyMessages.get(randomIndex); break;
             case SCARCITY:
+                randomIndex = random.nextInt(scarcityMessages.size());
                 msg = scarcityMessages.get(randomIndex); break;
             default:
+                randomIndex = random.nextInt(commitmentMessages.size());
                 msg = commitmentMessages.get(randomIndex); break;
         }
         // Funny messages have already incorporated activity parts.

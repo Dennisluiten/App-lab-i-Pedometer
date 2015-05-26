@@ -3,10 +3,11 @@ package iPedometer3;
 /**
  * Created by Hans-Christiaan on 25-5-2015.
  */
-public abstract class MovesBlock {
+public class MovesBlock {
 
     private long startTime;
     private long endTime;
+    private MovesBlockType type;
 
     public MovesBlock(long startTime, long endTime)
     {
@@ -27,5 +28,9 @@ public abstract class MovesBlock {
     public long getDuration()
     {
         return endTime - startTime;
+    }
+
+    public MovesBlockType getType() {
+        return type;
     }
 }
