@@ -1,15 +1,23 @@
 package iPedometer3;
 
 /**
- * Created by Hans-Christiaan on 25-5-2015.
+ * Created by Hans-Christiaan on 26-5-2015.
  */
 public class PersuasiveMessage {
-    /** When this message should be send.*/
-    private long timeStamp;
 
-    private String contents;
+    private PersuasivePart persuasivePart;
+    private String activityPart;
 
-    private PersuasionType type;
+    public PersuasiveMessage(PersuasivePart persuasivePart, String activityPart) {
+        this.persuasivePart = persuasivePart;
+        this.activityPart = activityPart;
+    }
 
+    public PersuasivePart getPersuasivePart() {
+        return persuasivePart;
+    }
 
+    public String getActivityPart() {
+        return activityPart;
+    }
 }
