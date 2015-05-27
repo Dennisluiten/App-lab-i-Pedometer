@@ -1,6 +1,10 @@
 package iPedometer3;
 
 /**
+ * Represents the persuasive part of a persuasive message.
+ * Contains a string representation of the actual message
+ * and the persuasion strategy it uses, e.g. authority, scarcity etc.
+ *
  * Created by Hans-Christiaan on 25-5-2015.
  */
 public class PersuasivePart {

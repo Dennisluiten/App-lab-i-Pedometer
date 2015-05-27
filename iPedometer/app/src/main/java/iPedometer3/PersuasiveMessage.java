@@ -1,6 +1,13 @@
 package iPedometer3;
 
 /**
+ * Represents a persuasive message.
+ * A persuasive message consists of two parts:
+ * A part that tries to persuade the user, e.g. "You have only limited
+ * time to live." (scarcity)
+ * and a part that proposes an activity, e.g. "Take the stairs
+ * instead of the elevator."
+ *
  * Created by Hans-Christiaan on 26-5-2015.
  */
 public class PersuasiveMessage {
@@ -19,5 +26,9 @@ public class PersuasiveMessage {
 
     public String getActivityPart() {
         return activityPart;
+    }
+
+    public String toString() {
+        return persuasivePart + " " + activityPart;
     }
 }

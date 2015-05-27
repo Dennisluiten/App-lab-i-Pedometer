@@ -1,10 +1,11 @@
 package iPedometer3;
 
-import java.util.Dictionary;
 import java.util.LinkedList;
 import java.util.Random;
 
 /**
+ * Generates messages based on a user's susceptibility
+ * for different persuasive strategies.
  * Created by Hans-Christiaan on 26-5-2015.
  */
 public class MessageGenerator {
