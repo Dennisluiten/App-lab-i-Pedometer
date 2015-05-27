@@ -14,7 +14,7 @@ public class MovesLoader {
 
     }
 
-    public LinkedList getStoryLine(long day)
+    public LinkedList<MovesBlock> getStoryLine(long day)
     {
         LinkedList<MovesBlock> storyLine = new LinkedList<MovesBlock>();
         //TODO: Laad MovesData door de Moves-API.

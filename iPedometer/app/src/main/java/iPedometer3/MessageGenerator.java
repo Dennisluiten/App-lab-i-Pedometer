@@ -33,7 +33,7 @@ public class MessageGenerator {
 
     private void loadMessages()
     {
-        // TODO: Laden van het 'persuasion'-gedeelte van de berichten en in de lists zetten. Ophalen uit database of hardcoderen?
+        // TODO: Laden van het 'persuasion'-gedeelte van de berichten uit database en in de lists zetten.
         consensusMessages.add(
                 new PersuasivePart("Minder dan 10% van de mensen is inactief.",
                         PersuasionType.CONSENSUS));
