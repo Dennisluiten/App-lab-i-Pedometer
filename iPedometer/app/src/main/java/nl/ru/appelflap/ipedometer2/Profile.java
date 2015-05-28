@@ -2,12 +2,15 @@ package nl.ru.appelflap.ipedometer2;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.support.v4.app.NotificationCompat;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.Menu;
@@ -60,11 +63,34 @@ public class Profile extends ActionBarActivity {
         Json json = new Json(profile, true);
         new Thread(json).start();
 
-        //CalendarIntegration ci = new CalendarIntegration(this);
+        CalendarIntegration ci = new CalendarIntegration(this);
 
         // SHOW POP_UP
         //Dialog dialog = onCreateDialog();
         //dialog.show();
+        NotificationCompat.Builder mBuilder =
+                new NotificationCompat.Builder(this)
+                .setSmallIcon(R.drawable.abc_ab_share_pack_mtrl_alpha)
+                .setContentTitle("iPedometer")
+                .setContentText("Notification Text");
+
+        Intent resultIntent = this.getIntent();
+
+        PendingIntent resultPendingIntent =
+                PendingIntent.getActivity(
+                        this,
+                        0,
+                        resultIntent,
+                        PendingIntent.FLAG_UPDATE_CURRENT
+                );
+
+        mBuilder.setContentIntent(resultPendingIntent);
+
+        int mNotificationID = 001;
+        NotificationManager mNotifyMgr =
+                (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+        mNotifyMgr.notify(mNotificationID, mBuilder.build());
+
     }
 
 

@@ -8,6 +8,7 @@ import android.util.Log;
 import android.widget.Toast;
 
 import java.sql.Date;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
 /**
@@ -39,7 +40,6 @@ public class CalendarIntegration {
         //String calendarEventURL = "content://com.android.calendar/events";  //Events
         //Log.d("CalendarIntegration", calendarEventURL);
 
-        Log.d("CalendarIntegration", "new Thread started");
         String[] projection = new String[] { Events.CALENDAR_ID, Events.TITLE, Events.DESCRIPTION, Events.DTSTART, Events.DTEND, Events.ALL_DAY, Events.EVENT_LOCATION };
 
 // 0 = January, 1 = February, ...
@@ -60,7 +60,14 @@ public class CalendarIntegration {
 
         if (cursor.moveToFirst()) {
             do {
-                Log.d("CalendarIntegration", "CalendarIntegration: Title: " + cursor.getString(1) + " Start-Time: " + (new Date(cursor.getLong(3))).toString());
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy.MM.dd ',' hh:mm:ss");
+                Calendar time = Calendar.getInstance();
+                time.setTime(new Date(cursor.getLong(3)));
+                int hours = time.get(Calendar.HOUR_OF_DAY);
+                String h = String.valueOf(hours);
+                Log.d("CalendarIntegration", h);
+                //Log.d("CalendarIntegration", "CalendarIntegration: Title: " + cursor.getString(1) + " Start-Time: " + sdf.format(cursor.getLong(3)));
+                //Log.d("CalendarIntegration", "Time: " + (cursor.getColumnName(0)) + ", " + (cursor.getColumnName(2)) + ", " + (cursor.getColumnName(4)) + ", " + (cursor.getColumnName(5)) + ", " + (cursor.getColumnName(6)));
                 //Toast.makeText(activity.getApplicationContext(), "Title: " + cursor.getString(1) + " Start-Time: " + (new Date(cursor.getLong(3))).toString(), Toast.LENGTH_LONG).show();
             } while ( cursor.moveToNext());
         }
