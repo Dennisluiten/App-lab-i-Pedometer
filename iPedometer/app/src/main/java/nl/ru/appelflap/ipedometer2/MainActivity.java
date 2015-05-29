@@ -93,7 +93,7 @@ public class MainActivity extends Activity {
                 Json json = new Json(profile, false, authorization);
                 new Thread(json).start();
                 try {
-                    Thread.sleep(2000);
+                    Thread.sleep(4000);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }

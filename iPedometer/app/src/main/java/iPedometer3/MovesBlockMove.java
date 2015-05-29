@@ -13,7 +13,21 @@ public class MovesBlockMove extends MovesBlock {
         this.type = type;
     }
 
-    public MovesMoveType getType()
+    public MovesBlockType getType() {
+        switch(type) {
+            case CYCLING:
+                return MovesBlockType.CYCLING;
+            case WALKING:
+                return MovesBlockType.WALKING;
+            case RUNNING:
+                return MovesBlockType.RUNNING;
+            case TRANSPORT:
+                return MovesBlockType.TRANSPORT;
+            default: return null;
+        }
+    }
+
+    public MovesMoveType getMoveType()
     {
         return type;
     }

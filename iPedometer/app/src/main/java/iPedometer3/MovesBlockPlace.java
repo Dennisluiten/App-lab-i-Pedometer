@@ -13,7 +13,21 @@ public class MovesBlockPlace extends MovesBlock {
         this.type = type;
     }
 
-    public MovesPlaceType getType()
+    public MovesBlockType getType() {
+        switch(type) {
+            case WORK:
+                return MovesBlockType.WORK;
+            case HOME:
+                return MovesBlockType.HOME;
+            case SCHOOL:
+                return MovesBlockType.SCHOOL;
+            case OTHER:
+                return MovesBlockType.OTHER;
+            default: return null;
+        }
+    }
+
+    public MovesPlaceType getPlaceType()
     {
         return type;
     }

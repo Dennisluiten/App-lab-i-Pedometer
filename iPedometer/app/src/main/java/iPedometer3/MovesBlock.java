@@ -8,6 +8,8 @@ public class MovesBlock {
     private long startTime;
     private long endTime;
     private MovesBlockType type;
+    private MovesMoveType movetype;
+    private MovesPlaceType placetype;
 
     public MovesBlock(long startTime, long endTime)
     {
@@ -33,4 +35,8 @@ public class MovesBlock {
     public MovesBlockType getType() {
         return type;
     }
+
+    public MovesMoveType getMoveType() {return movetype;}
+
+    public MovesPlaceType getPlaceType() {return placetype;}
 }
