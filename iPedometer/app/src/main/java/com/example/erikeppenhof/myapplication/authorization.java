@@ -1,4 +1,4 @@
-package nl.ru.appelflap.ipedometer2;
+package com.example.erikeppenhof.myapplication;
 
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
@@ -14,12 +14,7 @@ import android.widget.Toast;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.example.erikeppenhof.myapplication.R;
-
-/**
- * Demonstrates app-to-app and browser-app-browser integration with Moves API authorize flow.
- */
-public class MainActivity extends Activity {
+public class authorization extends Activity {
 
     private static final String CLIENT_ID = "yilMNmjo803XfXhwoQ76sre9Ozlx3Soc";
 
@@ -34,7 +29,7 @@ public class MainActivity extends Activity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_authorization);
 
         // get reference to the views
         findViewById(R.id.authorizeInApp).setOnClickListener(new View.OnClickListener() {
@@ -93,7 +88,7 @@ public class MainActivity extends Activity {
                 Json json = new Json(profile, false, authorization);
                 new Thread(json).start();
                 try {
-                    Thread.sleep(2000);
+                    Thread.sleep(4000);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -107,9 +102,9 @@ public class MainActivity extends Activity {
                 }
                 Log.d("MainActivityTest", access_token);
 
-                Intent intent = new Intent(this, Profile.class);
+                Intent intent = new Intent(authorization.this, LoginActivity.class);
                 intent.putExtra("access_token", access_token);
-                startActivity(intent);
+                authorization.this.startActivity(intent) ;
         }
 
     }
@@ -140,3 +135,4 @@ public class MainActivity extends Activity {
     }
 
 }
+

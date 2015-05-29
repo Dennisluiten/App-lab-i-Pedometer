@@ -1,29 +1,22 @@
-package nl.ru.appelflap.ipedometer2;
+package com.example.erikeppenhof.myapplication;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.support.v4.app.NotificationCompat;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.TextView;
-
-import com.example.erikeppenhof.myapplication.R;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
@@ -36,7 +29,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 
-public class Profile extends ActionBarActivity {
+public class MainActivity extends ActionBarActivity {
 
     final Context context = this;
 
@@ -57,49 +50,26 @@ public class Profile extends ActionBarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         //CalendarIntegration ci = new CalendarIntegration(this);
-        setContentView(R.layout.activity_profile);
-        //Log.d("app", "Profile OnCreate");
+        setContentView(R.layout.activity_main);
+        Log.d("ProfileIntent", "Profile OnCreate");
         Intent myIntent = this.getIntent();
         Log.d("ProfileIntent", myIntent.getStringExtra("access_token"));
         String profile = getString(R.string.baseurl) + getString(R.string.profile) + myIntent.getStringExtra("access_token");
         Json json = new Json(profile, true);
         new Thread(json).start();
 
-        CalendarIntegration ci = new CalendarIntegration(this);
+        //CalendarIntegration ci = new CalendarIntegration(this);
 
         // SHOW POP_UP
         //Dialog dialog = onCreateDialog();
         //dialog.show();
-        NotificationCompat.Builder mBuilder =
-                new NotificationCompat.Builder(this)
-                .setSmallIcon(R.drawable.abc_ab_share_pack_mtrl_alpha)
-                .setContentTitle("iPedometer")
-                .setContentText("Notification Text");
-
-        Intent resultIntent = this.getIntent();
-
-        PendingIntent resultPendingIntent =
-                PendingIntent.getActivity(
-                        this,
-                        0,
-                        resultIntent,
-                        PendingIntent.FLAG_UPDATE_CURRENT
-                );
-
-        mBuilder.setContentIntent(resultPendingIntent);
-
-        int mNotificationID = 001;
-        NotificationManager mNotifyMgr =
-                (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-        mNotifyMgr.notify(mNotificationID, mBuilder.build());
-
     }
 
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_profile, menu);
+        getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
     }
 
@@ -214,3 +184,4 @@ public class Profile extends ActionBarActivity {
     }
 
 }
+

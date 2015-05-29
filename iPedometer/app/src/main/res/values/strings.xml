@@ -1,7 +1,13 @@
 <resources>
     <string name="app_name">iPedometer</string>
+
+    <string name="stappen">Aantal stappen: </string>
+    <string name="action_settings">Instellingen</string>
+    <string name="title_activity_activity_authorization">activity_authorization</string>
+
     <string name="hello_world">Hello world!</string>
-    <string name="action_settings">Settings</string>
+    <string name="title_activity_authorization">authorization</string>
+
     <string name="title_activity_home">Home</string>
     <string name="title_activity_profile">Profile</string>
     <string name="dialog_message">Doe eens niet zo lui en pak de trap!</string>
