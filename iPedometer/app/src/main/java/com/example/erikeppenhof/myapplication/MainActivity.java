@@ -14,9 +14,12 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicNameValuePair;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
@@ -27,6 +30,12 @@ import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+
+import iPedometer3.MovesBlock;
+import iPedometer3.MovesLoader;
 
 
 public class MainActivity extends ActionBarActivity {
@@ -51,13 +60,33 @@ public class MainActivity extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         //CalendarIntegration ci = new CalendarIntegration(this);
         setContentView(R.layout.activity_main);
-        Log.d("ProfileIntent", "Profile OnCreate");
-        Intent myIntent = this.getIntent();
-        Log.d("ProfileIntent", myIntent.getStringExtra("access_token"));
-        String profile = getString(R.string.baseurl) + getString(R.string.profile) + myIntent.getStringExtra("access_token");
-        Json json = new Json(profile, true);
-        new Thread(json).start();
 
+        //Log.d("ProfileIntent", "Profile OnCreate");
+        Intent myIntent = this.getIntent();
+        String access_token = myIntent.getStringExtra("access_token");
+        //Log.d("ProfileIntent", myIntent.getStringExtra("access_token"));
+        //String profile = getString(R.string.baseurl) + getString(R.string.profile);
+        //List<NameValuePair> params = new ArrayList<NameValuePair>();
+        //params.add(new BasicNameValuePair("access_token=", myIntent.getStringExtra("access_token")));
+        //Json json = new Json(profile, true);
+        //new Thread(json).start();
+        //try {
+        //    wait();
+        //} catch (InterruptedException e) {
+        //    e.printStackTrace();
+        //}
+        MovesLoader movesLoader = new MovesLoader(access_token);
+        LinkedList<MovesBlock> storyLine = new LinkedList<>();
+        try {
+            storyLine = movesLoader.getStoryLine(System.currentTimeMillis());
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        Log.d("MainActivityStoryLine", String.valueOf(storyLine.size()));
+        MovesBlock movesBlock = storyLine.get(0);
+        Log.d("MainActivityStoryLine", "Start: " + movesBlock.getStartTime() + ", End: " + movesBlock.getEndTime());
         //CalendarIntegration ci = new CalendarIntegration(this);
 
         // SHOW POP_UP

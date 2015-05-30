@@ -11,12 +11,19 @@ import android.view.View;
 import android.widget.CheckBox;
 import android.widget.Toast;
 
+import org.apache.http.NameValuePair;
+import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class authorization extends Activity {
+import java.util.ArrayList;
+import java.util.List;
+
+public class Authorization extends Activity {
 
     private static final String CLIENT_ID = "yilMNmjo803XfXhwoQ76sre9Ozlx3Soc";
+
+    private static final String CLIENT_SECRET = "OLgzS7A0Ht9496umdeFkV262thaicI8e6E4vhlo5R6mUKrbL7Nfaf9TjQ9KeD8Mv";
 
     private static final String REDIRECT_URI = "https://www.google.nl";
 
@@ -25,6 +32,9 @@ public class authorization extends Activity {
     private CheckBox mLocation;
 
     private CheckBox mActivity;
+
+    private static final boolean get = true;
+    private static final boolean post = false;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -84,9 +94,24 @@ public class authorization extends Activity {
                     authorization = resultUri.getQueryParameter("code");
                 }
                 Log.d("MainActivity", authorization);
-                String profile = "https://api.moves-app.com/oauth/v1/access_token?grant_type=authorization_code&code=" + authorization + "&client_id=" + CLIENT_ID + "&client_secret=" + R.string.clientsecret + "&redirect_uri=" + REDIRECT_URI;
-                Json json = new Json(profile, false, authorization);
-                new Thread(json).start();
+                String profile = "https://api.moves-app.com/oauth/v1/access_token?";
+                // Request parameters and other properties.
+                List<NameValuePair> params = new ArrayList<NameValuePair>();
+                params.add(new BasicNameValuePair("grant_type", "authorization_code"));
+                params.add(new BasicNameValuePair("code", authorization));
+                params.add(new BasicNameValuePair("client_id", CLIENT_ID));
+                params.add(new BasicNameValuePair("client_secret", CLIENT_SECRET));
+                params.add(new BasicNameValuePair("redirect_uri", REDIRECT_URI));
+                Json json = new Json(profile, post, params);
+                Thread j = new Thread(json);
+                j.start();
+                //try {
+                //    while(json.getJSONObject() == null) {
+                //        wait();
+                //    }
+                //} catch (InterruptedException e) {
+                //    e.printStackTrace();
+                //}
                 try {
                     Thread.sleep(4000);
                 } catch (InterruptedException e) {
@@ -102,9 +127,9 @@ public class authorization extends Activity {
                 }
                 Log.d("MainActivityTest", access_token);
 
-                Intent intent = new Intent(authorization.this, LoginActivity.class);
+                Intent intent = new Intent(Authorization.this, LoginActivity.class);
                 intent.putExtra("access_token", access_token);
-                authorization.this.startActivity(intent) ;
+                Authorization.this.startActivity(intent) ;
         }
 
     }

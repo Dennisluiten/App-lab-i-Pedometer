@@ -18,7 +18,7 @@ package="com.example.erikeppenhof.myapplication" >
     android:label="iPedometer"
     android:theme="@style/AppTheme" >
     <activity
-        android:name=".authorization"
+        android:name=".Authorization"
         android:label="@string/title_activity_authorization" >
         <intent-filter>
             <action android:name="android.intent.action.MAIN" />
