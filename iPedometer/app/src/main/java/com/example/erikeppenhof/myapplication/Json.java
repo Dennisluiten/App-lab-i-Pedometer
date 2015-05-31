@@ -185,4 +185,15 @@ public class Json implements Runnable {
         return (ArrayList<String>) list;
     }
 
+    public int getSteps() throws JSONException {
+        int steps = 0;
+        //TODO: implement
+        JSONArray summary = jsonObject.getJSONArray("summary");
+        for (int i = 0 ; i < summary.length() ; i++) {
+            if (summary.getJSONObject(i).get("steps") != null) {
+                steps += (int) summary.getJSONObject(i).get("steps");
+            }
+        }
+        return steps;
+    }
 }

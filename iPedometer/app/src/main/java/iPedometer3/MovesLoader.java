@@ -112,7 +112,7 @@ public class MovesLoader {
         return storyLine;
     }
 
-    private Json getJson(long day){
+    public Json getJson(long day){
         // Get date in right format
         SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
         Date d = new Date();

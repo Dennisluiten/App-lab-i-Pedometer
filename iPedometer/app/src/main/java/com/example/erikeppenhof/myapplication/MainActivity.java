@@ -12,6 +12,7 @@ import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.TextView;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
@@ -76,6 +77,26 @@ public class MainActivity extends ActionBarActivity {
         //    e.printStackTrace();
         //}
         MovesLoader movesLoader = new MovesLoader(access_token);
+        Json json = movesLoader.getJson(System.currentTimeMillis());
+        new Thread(json).start();
+        try {
+            Thread.sleep(6000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        int steps = 0;
+        try {
+            steps = json.getSteps();
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        Log.d("MainActivitySteps", String.valueOf(steps));
+        TextView textView = (TextView)findViewById(R.id.steps);
+        String st = getResources().getString(R.string.stappen);
+        String stappen = String.format(st, steps);
+        textView.setText(stappen);
+
         LinkedList<MovesBlock> storyLine = new LinkedList<>();
         try {
             storyLine = movesLoader.getStoryLine(System.currentTimeMillis());
@@ -85,8 +106,12 @@ public class MainActivity extends ActionBarActivity {
             e.printStackTrace();
         }
         Log.d("MainActivityStoryLine", String.valueOf(storyLine.size()));
-        MovesBlock movesBlock = storyLine.get(0);
-        Log.d("MainActivityStoryLine", "Start: " + movesBlock.getStartTime() + ", End: " + movesBlock.getEndTime());
+        MovesBlock movesBlock;
+        if ( storyLine.size() > 0 ) {
+            movesBlock = storyLine.get(0);
+            Log.d("MainActivityStoryLine", "Start: " + movesBlock.getStartTime() + ", End: " + movesBlock.getEndTime());
+        }
+
         //CalendarIntegration ci = new CalendarIntegration(this);
 
         // SHOW POP_UP
@@ -140,76 +165,6 @@ public class MainActivity extends ActionBarActivity {
             }
         });
         return builder.create();
-    }
-
-    public void sendPostRequest() throws MalformedURLException, IOException {
-        URL reqURL = new URL("testURL"); //the URL we will send the request to
-        HttpURLConnection request = (HttpURLConnection) (reqURL.openConnection());
-        String post = "Test Post";
-        request.setDoOutput(true);
-        request.addRequestProperty("Content-Length", Integer.toString(post.length())); //add the content length of the post data
-        request.addRequestProperty("Content-Type", "application/x-www-form-urlencoded"); //add the content type of the request, most post data is of this type
-        request.setRequestMethod("POST");
-        request.connect();
-        OutputStreamWriter writer = new OutputStreamWriter(request.getOutputStream()); //we will write our request data here
-        writer.write(post);
-        writer.flush();
-    }
-/*
-    public void sendGetRequest(String url) throws MalformedURLException, IOException {
-        URL reqURL = new URL("http://api.moves-app.com" + url); //the URL we will send the request to
-        HttpURLConnection request = (HttpURLConnection) (reqURL.openConnection());
-        request.setRequestMethod("GET");
-        request.connect();
-    }*/
-
-    public static JSONObject GET(String url){
-        //url = "http://api.moves-app.com" + url;
-        InputStream inputStream = null;
-        String result = "";
-        JSONObject jsonObject = new JSONObject();
-        try {
-
-            // create HttpClient
-            HttpClient httpclient = new DefaultHttpClient();
-
-            // make GET request to the given URL
-            HttpResponse httpResponse = httpclient.execute(new HttpGet(url));
-
-            // receive response as inputStream
-            inputStream = httpResponse.getEntity().getContent();
-
-            BufferedReader streamReader = new BufferedReader(new InputStreamReader(inputStream, "UTF-8"));
-            StringBuilder responseStrBuilder = new StringBuilder();
-
-            String inputStr;
-            while ((inputStr = streamReader.readLine()) != null)
-                responseStrBuilder.append(inputStr);
-            jsonObject = new JSONObject(responseStrBuilder.toString());
-
-            // convert inputstream to string
-            //if(inputStream != null)
-            //    result = convertInputStreamToString(inputStream);
-            //else
-            //    result = "Did not work!";
-
-        } catch (Exception e) {
-            Log.d("InputStream", e.getLocalizedMessage());
-        }
-
-        return jsonObject;
-    }
-
-    private static String convertInputStreamToString(InputStream inputStream) throws IOException{
-        BufferedReader bufferedReader = new BufferedReader( new InputStreamReader(inputStream));
-        String line = "";
-        String result = "";
-        while((line = bufferedReader.readLine()) != null)
-            result += line;
-
-        inputStream.close();
-        return result;
-
     }
 
 }
