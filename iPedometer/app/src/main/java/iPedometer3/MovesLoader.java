@@ -39,7 +39,7 @@ public class MovesLoader {
         //while(json.getJSONObject() == null) {
         //    wait();
         //}
-        Thread.sleep(8000);
+        Thread.sleep(6000);
 
         JSONObject jsonObject = json.getJSONObject();
 

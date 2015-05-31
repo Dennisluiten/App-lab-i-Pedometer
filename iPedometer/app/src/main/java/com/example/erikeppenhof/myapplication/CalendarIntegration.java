@@ -5,8 +5,12 @@ import android.provider.CalendarContract;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 
-import java.sql.Date;
+import java.util.Date;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.LinkedList;
+
+import iPedometer3.CalendarEvent;
 
 /**
  * Created by erikeppenhof on 27-05-15.
@@ -32,102 +36,43 @@ public class CalendarIntegration {
         public CalendarIntegration(ActionBarActivity act) {
             Log.d("CalendarIntegration", "CalendarIntegration started");
             activity = act;
+        }
 
+        public LinkedList<CalendarEvent> getCalendarEvents(Date startdate, Date enddate) {
+            LinkedList<CalendarEvent> calendarEvents = new LinkedList<>();
             //String calendarEventURL = "content://com.android.calendar/events";  //Events
             //Log.d("CalendarIntegration", calendarEventURL);
 
             Log.d("CalendarIntegration", "new Thread started");
             String[] projection = new String[] { CalendarContract.Events.CALENDAR_ID, CalendarContract.Events.TITLE, CalendarContract.Events.DESCRIPTION, CalendarContract.Events.DTSTART, CalendarContract.Events.DTEND, CalendarContract.Events.ALL_DAY, CalendarContract.Events.EVENT_LOCATION };
 
-// 0 = January, 1 = February, ...
-
+            // 0 = January, 1 = February, ...
             Calendar startTime = Calendar.getInstance();
-            startTime.set(2014,00,01,00,00);
+            startTime.setTime(startdate);
+            startTime.set(startTime.get(Calendar.YEAR), startTime.get(Calendar.MONTH), startTime.get(Calendar.DAY_OF_MONTH), 00, 00);
 
             Calendar endTime= Calendar.getInstance();
-            endTime.set(2015,00,01,00,00);
+            endTime.setTime(enddate);
+            endTime.set(endTime.get(Calendar.YEAR), endTime.get(Calendar.MONTH), endTime.get(Calendar.DAY_OF_MONTH),00,00);
 
-// the range is all data from 2014
+            // the range is all data from startdate to enddate
 
             String selection = "(( " + CalendarContract.Events.DTSTART + " >= " + startTime.getTimeInMillis() + " ) AND ( " + CalendarContract.Events.DTSTART + " <= " + endTime.getTimeInMillis() + " ))";
             Log.d("CalendarIntegration", "Before cursor");
             Cursor cursor = activity.getBaseContext().getContentResolver().query( CalendarContract.Events.CONTENT_URI, projection, selection, null, null );
             Log.d("CalendarIntegration", "After cursor");
-// output the events
+            // output the events
 
             if (cursor.moveToFirst()) {
                 do {
-                    Log.d("CalendarIntegration", "CalendarIntegration: Title: " + cursor.getString(1) + " Start-Time: " + (new Date(cursor.getLong(3))).toString());
+                    Log.d("CalendarIntegration", "CalendarIntegration: Title: " + cursor.getColumnName(1) + "," + cursor.getString(1) + " Start-Time: " + cursor.getColumnName(3) + ", " + cursor.getLong(3) + " End-Time: " + cursor.getColumnName(4) + ", " + cursor.getLong(4));
+                    calendarEvents.add(new CalendarEvent(cursor.getLong(3), cursor.getLong(4), cursor.getString(1)));
                     //Toast.makeText(activity.getApplicationContext(), "Title: " + cursor.getString(1) + " Start-Time: " + (new Date(cursor.getLong(3))).toString(), Toast.LENGTH_LONG).show();
                 } while ( cursor.moveToNext());
             }
-            //String calendarEventURL = "content://com.android.calendar/events";  //Events
-            //Log.d("CalendarIntegration", calendarEventURL);
-        /*new Thread(new Runnable() {
-            @Override
-            public void run() {
-                Log.d("CalendarIntegration", "new Thread started");
-                String[] projection = new String[] { Events.CALENDAR_ID, Events.TITLE, Events.DESCRIPTION, Events.DTSTART, Events.DTEND, Events.ALL_DAY, Events.EVENT_LOCATION };
-
-// 0 = January, 1 = February, ...
-
-                Calendar startTime = Calendar.getInstance();
-                startTime.set(2014,00,01,00,00);
-
-                Calendar endTime= Calendar.getInstance();
-                endTime.set(2015,00,01,00,00);
-
-// the range is all data from 2014
-
-                String selection = "(( " + Events.DTSTART + " >= " + startTime.getTimeInMillis() + " ) AND ( " + Events.DTSTART + " <= " + endTime.getTimeInMillis() + " ))";
-                Log.d("CalendarIntegration", "Before cursor");
-                Cursor cursor = activity.getBaseContext().getContentResolver().query( Events.CONTENT_URI, projection, selection, null, null );
-                Log.d("CalendarIntegration", "After cursor");
-// output the events
-
-                if (cursor.moveToFirst()) {
-                    do {
-                        Log.d("CalendarIntegration", "CalendarIntegration: Title: " + cursor.getString(1) + " Start-Time: " + (new Date(cursor.getLong(3))).toString());
-                        Toast.makeText(activity.getApplicationContext(), "Title: " + cursor.getString(1) + " Start-Time: " + (new Date(cursor.getLong(3))).toString(), Toast.LENGTH_LONG).show();
-                    } while ( cursor.moveToNext());
-                }
-
-            /*    // Run query
-                Cursor cur = null;
-
-                ContentResolver cr = activity.getContentResolver();
-                Uri uri = Calendars.CONTENT_URI;
-                //String selection = "((" + Calendars.ACCOUNT_NAME + " = ?) AND ("
-                //        + Calendars.ACCOUNT_TYPE + " = ?) AND ("
-                //        + Calendars.OWNER_ACCOUNT + " = ?))";
-                // TODO: let user enter own e-mail (and account type)
-                //String[] selectionArgs = new String[] {"sennavaniersel@gmail.com", "com.google",
-                //        "sennavaniersel@gmail.com"};
-                // Submit the query and get a Cursor object back.
-                cur = cr.query(uri, EVENT_PROJECTION, null, null, null);
-
-
-
-                // Use the cursor to step through the returned records
-                while (cur.moveToNext()) {
-                    long calID = 0;
-                    String displayName = null;
-                    String accountName = null;
-                    String ownerName = null;
-
-                    // Get the field values
-                    calID = cur.getLong(PROJECTION_ID_INDEX);
-                    displayName = cur.getString(PROJECTION_DISPLAY_NAME_INDEX);
-                    accountName = cur.getString(PROJECTION_ACCOUNT_NAME_INDEX);
-                    ownerName = cur.getString(PROJECTION_OWNER_ACCOUNT_INDEX);
-
-                    // Do something with the values...
-
-                }
-
-            }
-        });*/
+            return calendarEvents;
         }
+
     }
 
 

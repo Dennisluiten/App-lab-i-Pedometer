@@ -1,5 +1,11 @@
 package iPedometer3;
 
+import android.app.Notification;
+import android.support.v7.app.ActionBarActivity;
+
+import com.example.erikeppenhof.myapplication.CalendarIntegration;
+
+import java.util.Date;
 import java.util.LinkedList;
 
 /**
@@ -7,15 +13,17 @@ import java.util.LinkedList;
  */
 public class CalendarLoader {
 
-    public CalendarLoader()
-    {
+    private ActionBarActivity act = null;
 
+    public CalendarLoader(ActionBarActivity actionBarActivity)
+    {
+        this.act = actionBarActivity;
     }
 
-    public LinkedList<CalendarEvent> loadCalendar()
+    public LinkedList<CalendarEvent> loadCalendar(Date startdate, Date enddate)
     {
-        LinkedList<CalendarEvent> events = new LinkedList<CalendarEvent>();
-
+        CalendarIntegration calendarIntegration = new CalendarIntegration(act);
+        LinkedList<CalendarEvent> events = calendarIntegration.getCalendarEvents(startdate, enddate);
         return events;
     }
 }

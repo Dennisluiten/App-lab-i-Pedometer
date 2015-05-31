@@ -31,10 +31,13 @@ import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Date;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.LinkedList;
 import java.util.List;
 
+import iPedometer3.CalendarLoader;
 import iPedometer3.MovesBlock;
 import iPedometer3.MovesLoader;
 
@@ -59,12 +62,32 @@ public class MainActivity extends ActionBarActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        //CalendarIntegration ci = new CalendarIntegration(this);
         setContentView(R.layout.activity_main);
 
         //Log.d("ProfileIntent", "Profile OnCreate");
         Intent myIntent = this.getIntent();
         String access_token = myIntent.getStringExtra("access_token");
+
+        CalendarLoader calendarLoader = new CalendarLoader(this);
+        Calendar cal = Calendar.getInstance();
+        int startYear = 2015;
+        int startMonth = cal.MAY;
+        int startDay = 18;
+        int endYear = 2015;
+        int endMonth = cal.MAY;
+        int endDay = 24;
+        cal.set(cal.YEAR, startYear);
+        cal.set(cal.MONTH, startMonth);
+        cal.set(cal.DATE, startDay);
+        Date startdate = new Date();
+        startdate.setTime(cal.getTimeInMillis());
+        cal.set(cal.YEAR, endYear);
+        cal.set(cal.MONTH, endMonth);
+        cal.set(cal.DATE, endDay);
+        Date enddate = new Date();
+        enddate.setTime(cal.getTimeInMillis());
+        calendarLoader.loadCalendar(startdate, enddate);
+
         //Log.d("ProfileIntent", myIntent.getStringExtra("access_token"));
         //String profile = getString(R.string.baseurl) + getString(R.string.profile);
         //List<NameValuePair> params = new ArrayList<NameValuePair>();
@@ -76,6 +99,7 @@ public class MainActivity extends ActionBarActivity {
         //} catch (InterruptedException e) {
         //    e.printStackTrace();
         //}
+
         MovesLoader movesLoader = new MovesLoader(access_token);
         Json json = movesLoader.getJson(System.currentTimeMillis());
         new Thread(json).start();

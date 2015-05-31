@@ -191,6 +191,7 @@ public class Json implements Runnable {
         JSONArray summary = jsonObject.getJSONArray("summary");
         for (int i = 0 ; i < summary.length() ; i++) {
             if (summary.getJSONObject(i).get("steps") != null) {
+                Log.d("JSONSTEPS", String.valueOf(summary.getJSONObject(i).get("steps")));
                 steps += (int) summary.getJSONObject(i).get("steps");
             }
         }
