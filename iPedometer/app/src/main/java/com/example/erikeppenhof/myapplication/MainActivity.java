@@ -2,40 +2,26 @@ package com.example.erikeppenhof.myapplication;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.support.v4.app.NotificationCompat;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONException;
-import org.json.JSONObject;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.Date;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.LinkedList;
-import java.util.List;
 
 import iPedometer3.CalendarLoader;
 import iPedometer3.MovesBlock;
@@ -43,21 +29,6 @@ import iPedometer3.MovesLoader;
 
 
 public class MainActivity extends ActionBarActivity {
-
-    final Context context = this;
-
-    private static final int DISPLAY_DATA = 1;
-
-    private int snoozetime = 5000; // 60000*30; // half an hour
-
-    private Handler mHandler = new Handler() {
-        @Override
-        public void handleMessage(Message msg) {
-            if (msg.what == DISPLAY_DATA) {
-                onCreateDialog().show();
-            }
-        }
-    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -137,10 +108,6 @@ public class MainActivity extends ActionBarActivity {
         }
 
         //CalendarIntegration ci = new CalendarIntegration(this);
-
-        // SHOW POP_UP
-        //Dialog dialog = onCreateDialog();
-        //dialog.show();
     }
 
 
@@ -166,30 +133,28 @@ public class MainActivity extends ActionBarActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    public Dialog onCreateDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(context);
-        builder.setMessage(R.string.dialog_message).setTitle(R.string.dialog_title);
-        builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int id) {
-                // Cancel
-            }
-        });
-        builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int id) {
-                // OK
-            }
-        });
-        builder.setNeutralButton(R.string.snooze, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int id) {
-                // Snooze
-                mHandler.sendEmptyMessageDelayed(DISPLAY_DATA, snoozetime);
-            }
-        });
-        return builder.create();
-    }
+    public void CreateNotification(String notification) {
+        NotificationCompat.Builder mBuilder =
+                new NotificationCompat.Builder(this)
+                        .setSmallIcon(R.drawable.appicon2)
+                        .setContentTitle("iPedometer")
+                        .setContentText(notification);
 
+        Intent resultIntent = new Intent(MainActivity.this, NotificationActivity.class);
+        PendingIntent resultPendingIntent =
+                PendingIntent.getActivity(
+                        this,
+                        0,
+                        resultIntent,
+                        PendingIntent.FLAG_UPDATE_CURRENT
+                );
+
+        mBuilder.setContentIntent(resultPendingIntent);
+
+        int mNotificationID = 001;
+        NotificationManager mNotifyMgr =
+                (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+        mNotifyMgr.notify(mNotificationID, mBuilder.build());
+    }
 }
 

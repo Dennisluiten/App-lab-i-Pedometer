@@ -127,6 +127,8 @@ public class Authorization extends Activity {
                 }
                 Log.d("MainActivityTest", access_token);
 
+                //TODO: save access_token to database
+
                 Intent intent = new Intent(Authorization.this, LoginActivity.class);
                 intent.putExtra("access_token", access_token);
                 Authorization.this.startActivity(intent) ;

@@ -18,4 +18,6 @@
     <string name="profile">/user/profile?access_token=</string>
     <string name="baseurl">https://api.moves-app.com/api/1.1</string>
     <string name="clientsecret">OLgzS7A0Ht9496umdeFkV262thaicI8e6E4vhlo5R6mUKrbL7Nfaf9TjQ9KeD8Mv</string>
+    <string name="title_activity_main_app">MainApp</string>
+    <string name="title_activity_notification">NotificationActivity</string>
 </resources>
