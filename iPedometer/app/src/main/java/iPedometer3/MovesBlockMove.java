@@ -6,15 +6,21 @@ package iPedometer3;
 public class MovesBlockMove extends MovesBlock {
 
     private MovesBlockType type;
+    private long distance;
 
-    public MovesBlockMove(long startTime, long endTime, MovesBlockType type)
+    public MovesBlockMove(long startTime, long endTime, MovesBlockType type, long distance)
     {
         super(startTime, endTime, type);
+        this.distance = distance;
     }
 
     public MovesBlockType getType()
     {
         return type;
+    }
+
+    public long getDistance() {
+        return distance;
     }
 
     public boolean isMove() {

@@ -12,11 +12,17 @@ import java.util.ListIterator;
 public class TimedMessagesGenerator {
 
     // TODO: Waardes bepalen, deze zijn willekeurige placeholders.
-    private static final int MAX_CYCLING_DURATION = 5000;
-    private static final int MAX_WALKING_DURATION = 2500;
-    private static final int MSG_TIME_OFFSET = 500;
-    private static final int WALK_AROUND_BLOCK_TIME = 10000;
-    private static final int DESK_EXERCISE_TIME = 10000;
+    // Een minuut in milliseconden.
+    private static final int MINUTE = 600;
+    // Afstand is in meters.
+    private static final int MAX_CYCLING_DISTANCE = 5000;
+    private static final int MAX_WALKING_DISTANCE = 1000;
+    // Tijd is in milliseconden.
+    private static final int MAX_CYCLING_DURATION = 20 * MINUTE;
+    private static final int MAX_WALKING_DURATION = 10 * MINUTE;
+    private static final int MSG_TIME_OFFSET = 5 * MINUTE;
+    private static final int WALK_AROUND_BLOCK_TIME = 30 * MINUTE;
+    private static final int DESK_EXERCISE_TIME = 10 * MINUTE;
 
     private MessageGenerator msg_gen;
 
@@ -111,27 +117,29 @@ public class TimedMessagesGenerator {
      */
     private void walkCycleMessage(MovesBlock mb, LinkedList<TimedMessage> messages)
     {
-        // fietsbare afstand?
-        if(mb.getType() == MovesBlockType.TRANSPORT
-                && mb.getDuration() <= MAX_CYCLING_DURATION)
+        if(mb.getType() == MovesBlockType.TRANSPORT)
         {
-            PersuasiveMessage p_msg = msg_gen.generateMessage(
-                    "Als je maar een kleine afstand moet rijden, kun je overwegen om met de fiets te gaan.");
-            TimedMessage msg = new TimedMessage(
-                    mb.getStartTime() - MSG_TIME_OFFSET,
-                    p_msg);
-            messages.add(msg);
-        }
-        // loopbare afstand?
-        else if(mb.getType() == MovesBlockType.TRANSPORT || mb.getType() == MovesBlockType.CYCLING
-                && mb.getDuration() <= MAX_WALKING_DURATION)
-        {
-            PersuasiveMessage p_msg = msg_gen.generateMessage(
-                    "Als je maar een kleine afstand moet rijden, kun je overwegen om te voet te gaan.");
-            TimedMessage msg = new TimedMessage(
-                    mb.getStartTime() - MSG_TIME_OFFSET,
-                    p_msg);
-            messages.add(msg);
+            MovesBlockMove mb_m = (MovesBlockMove) mb;
+            // fietsbare afstand?
+            if(mb_m.getDistance() <= MAX_CYCLING_DISTANCE)
+            {
+                PersuasiveMessage p_msg = msg_gen.generateMessage(
+                        "Als je maar een kleine afstand moet rijden, kun je overwegen om met de fiets te gaan.");
+                TimedMessage msg = new TimedMessage(
+                        mb.getStartTime() - MSG_TIME_OFFSET,
+                        p_msg);
+                messages.add(msg);
+            }
+            // loopbare afstand?
+            else if(mb_m.getDistance() <= MAX_WALKING_DISTANCE)
+            {
+                PersuasiveMessage p_msg = msg_gen.generateMessage(
+                        "Als je maar een kleine afstand moet rijden, kun je overwegen om te voet te gaan.");
+                TimedMessage msg = new TimedMessage(
+                        mb.getStartTime() - MSG_TIME_OFFSET,
+                        p_msg);
+                messages.add(msg);
+            }
         }
     }
 

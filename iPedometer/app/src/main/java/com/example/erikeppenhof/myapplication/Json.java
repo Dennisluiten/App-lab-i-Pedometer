@@ -177,8 +177,14 @@ public class Json implements Runnable {
             JSONArray array2 = array.getJSONObject(i).getJSONArray(jsonString2);
             Log.d("JSONstring21", array2.toString());
             for(int j = 0 ; j < array2.length() ; j++){
-                Log.d("JSONstring3", array2.getJSONObject(j).getString(jsonString3));
-                list.add(array2.getJSONObject(j).getString(jsonString3));
+                try {
+                    Log.d("JSONstring3", array2.getJSONObject(j).getString(jsonString3));
+                    list.add(array2.getJSONObject(j).getString(jsonString3));
+                }
+                catch(JSONException e) {
+                    // Key "JSONstring3" niet gevonden, voeg lege string toe.
+                    list.add("");
+                }
             }
         }
         Log.d("JSONTEST", list.get(0));

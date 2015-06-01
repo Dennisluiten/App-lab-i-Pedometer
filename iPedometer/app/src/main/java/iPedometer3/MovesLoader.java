@@ -3,7 +3,7 @@ package iPedometer3;
 import android.util.Log;
 
 import com.example.erikeppenhof.myapplication.Json;
-import com.example.erikeppenhof.myapplication.R;
+//import com.example.erikeppenhof.myapplication.R;
 
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
@@ -52,8 +52,11 @@ public class MovesLoader {
         ArrayList<String> endTime = json.parseActivities(jsonObject, "segments", "activities", "endTime");
         Log.d("MovesLoaderListEnd", String.valueOf(endTime.size()));
 
+        // Laad afstanden [HC].
+        ArrayList<String> distances = json.parseActivities(jsonObject, "segments", "activities", "distance");
+
         try {
-            storyLine = makeStoryLine(type, activities, startTime, endTime);
+            storyLine = makeStoryLine(type, activities, startTime, endTime, distances);
         } catch (ParseException e) {
             e.printStackTrace();
         }
@@ -61,7 +64,9 @@ public class MovesLoader {
         return storyLine;
     }
 
-    private LinkedList<MovesBlock> makeStoryLine(ArrayList<String> type, ArrayList<String> act, ArrayList<String> start, ArrayList<String> end) throws ParseException {
+    private LinkedList<MovesBlock> makeStoryLine(ArrayList<String> type, ArrayList<String> act,
+                                                 ArrayList<String> start, ArrayList<String> end,
+                                                 ArrayList<String> distance) throws ParseException {
         LinkedList<MovesBlock> storyLine = new LinkedList<MovesBlock>();
 
         if ((type.size() == act.size()) && (act.size() == start.size()) && (start.size() == end.size())) {
@@ -74,15 +79,16 @@ public class MovesLoader {
                 long endtime = et.getTime();
                 Log.d("MovesLoader", "forloop");
                 if (type.get(i).equals("move")) {
+                    long dist = new Long(distance.get(i));
                     Log.d("MovesLoader", "if");
                     switch(act.get(i)) {
-                        case "walking": storyLine.add(new MovesBlockMove(starttime, endtime, MovesBlockType.WALKING));
+                        case "walking": storyLine.add(new MovesBlockMove(starttime, endtime, MovesBlockType.WALKING, dist));
                             break;
-                        case "transport": storyLine.add(new MovesBlockMove(starttime, endtime, MovesBlockType.TRANSPORT));
+                        case "transport": storyLine.add(new MovesBlockMove(starttime, endtime, MovesBlockType.TRANSPORT, dist));
                             break;
-                        case "running": storyLine.add(new MovesBlockMove(starttime, endtime, MovesBlockType.RUNNING));
+                        case "running": storyLine.add(new MovesBlockMove(starttime, endtime, MovesBlockType.RUNNING, dist));
                             break;
-                        case "cycling": storyLine.add(new MovesBlockMove(starttime, endtime, MovesBlockType.CYCLING));
+                        case "cycling": storyLine.add(new MovesBlockMove(starttime, endtime, MovesBlockType.CYCLING, dist));
                             break;
                         default: Log.d("MovesLoaderStoryLine", act.get(i));
                             break;

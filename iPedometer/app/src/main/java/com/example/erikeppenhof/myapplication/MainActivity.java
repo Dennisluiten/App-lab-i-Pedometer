@@ -41,7 +41,6 @@ import iPedometer3.CalendarLoader;
 import iPedometer3.MovesBlock;
 import iPedometer3.MovesLoader;
 
-
 public class MainActivity extends ActionBarActivity {
 
     final Context context = this;
