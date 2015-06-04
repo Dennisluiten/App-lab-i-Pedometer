@@ -10,8 +10,6 @@
 
     <string name="title_activity_home">Home</string>
     <string name="title_activity_profile">Profile</string>
-    <string name="dialog_message">Doe eens niet zo lui en pak de trap!</string>
-    <string name="dialog_title">iPedometer</string>
     <string name="ok">OK</string>
     <string name="cancel">Nu niet</string>
     <string name="snooze">Herinner me later</string>
