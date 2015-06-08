@@ -4,8 +4,10 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.Notification;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 
 import iPedometer3.TimedMessage;
 
@@ -40,11 +42,18 @@ public class MessageSender {
                 .setContentText(message.getMessage().toString())
                 .setSmallIcon(R.drawable.appicon);
 
-        // TODO: Breng de gebruiker naar de app met de dialog als die op de notifactie drukt.
+        // TODO: Breng de gebruiker naar de app met de dialog als die op de notificatie drukt.
+        // TODO: Nieuwe 'activity'? Dit werkt waarschijnlijk niet zoals gedacht.
+        Intent startActivity = new Intent(context, MainActivity.class);
+        startActivity.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, startActivity, 0);
+        // Set the notification to bring the user back here.
+        builder.setContentIntent(pendingIntent);
 
         NotificationManager mNotificationManager =
                 (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
         // Send notification.
+        // TODO: echte ID i.p.v. '10'?
         mNotificationManager.notify(10, builder.build());
 
     }
@@ -57,18 +66,21 @@ public class MessageSender {
             @Override
             public void onClick(DialogInterface dialog, int id) {
                 // TODO: 'cancel'-functionaliteit implementeren.
+                // Oftewel: sla op server op dat gebruiker de taak niet gaat uitvoeren.
             }
         });
         builder.setPositiveButton("Ik doe het", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int id) {
                 // TODO: 'ok'-functionaliteit implementeren.
+                // Oftewel: sla op server op dat gebruiker de taak zegt uit te voeren.
             }
         });
         builder.setNeutralButton("Snooze", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int id) {
                 // TODO: 'snooze'-functionaliteit implementeren.
+                // Laat bericht n minuten later zien.
             }
         });
         return builder.create();
