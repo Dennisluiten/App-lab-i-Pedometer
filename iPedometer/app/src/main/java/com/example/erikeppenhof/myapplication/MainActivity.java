@@ -17,12 +17,14 @@ import java.util.Date;
 import java.util.Calendar;
 import java.util.LinkedList;
 
+import iPedometer3.AbstractTimedMessageGenerator;
 import iPedometer3.CalendarEvent;
 import iPedometer3.CalendarLoader;
 import iPedometer3.MovesBlock;
 import iPedometer3.MovesLoader;
 import iPedometer3.PersuasionType;
 import iPedometer3.RandomCollection;
+import iPedometer3.RandomTimedMessagesGenerator;
 import iPedometer3.TimedMessage;
 import iPedometer3.TimedMessagesGenerator;
 
@@ -65,8 +67,31 @@ public class MainActivity extends ActionBarActivity {
         MovesLoader movesLoader = new MovesLoader(access_token);
         LinkedList<MovesBlock> storyLine = loadMovesData(movesLoader);
 
-        TimedMessagesGenerator generator = new TimedMessagesGenerator(userScores);
-        LinkedList<TimedMessage> timedMessages = generator.generateTimedMessages(storyLine, calendarEvents);
+        LinkedList<TimedMessage> timedMessages;
+
+        // TODO: bepalen wanneer de gebruiker is begonnen met de studie?
+        int startDay = 15;
+        Calendar cal = Calendar.getInstance();
+        if(cal.get(Calendar.DAY_OF_MONTH) <= startDay + 7)
+        {
+            // Eerste week -> willekeurige berichten
+            AbstractTimedMessageGenerator generator = new RandomTimedMessagesGenerator(userScores);
+            timedMessages = generator.generateTimedMessages(storyLine, calendarEvents);
+        }
+        else
+        {
+            // Tweede week
+            if(inControlGroup()) {
+                // Gebruiker zit in controlegroep, ga door met willekeurige berichten sturen.
+                AbstractTimedMessageGenerator generator = new TimedMessagesGenerator(userScores);
+                timedMessages = generator.generateTimedMessages(storyLine, calendarEvents);
+            }
+            else {
+                // Gebruiker zit in 'echte' groep, stuur getimede berichten.
+                AbstractTimedMessageGenerator generator = new RandomTimedMessagesGenerator(userScores);
+                timedMessages = generator.generateTimedMessages(storyLine, calendarEvents);
+            }
+        }
 
         sendMessages(timedMessages);
 
@@ -102,6 +127,12 @@ public class MainActivity extends ActionBarActivity {
         //CalendarIntegration ci = new CalendarIntegration(this);
     }
 
+    private boolean inControlGroup()
+    {
+        //TODO: laad uit database of gebruiker in de controlegroep zit of niet.
+        return false;
+    }
+
     private RandomCollection<PersuasionType> getUserSusceptibilityScores()
     {
         return new RandomCollection<PersuasionType>();
@@ -125,12 +156,18 @@ public class MainActivity extends ActionBarActivity {
         CalendarLoader calendarLoader = new CalendarLoader(this);
         Calendar cal = Calendar.getInstance();
 
+        cal.set(cal.HOUR, 0);
+        cal.set(cal.MINUTE, 0);
+        cal.set(cal.SECOND, 0);
         cal.set(cal.MILLISECOND, 0);
 
         Date startTime = new Date(cal.getTimeInMillis());
 
-        cal.set(cal.HOUR, 24);
-        // TODO: start om 00:00:00, eindig om 23:59:59
+        cal.set(cal.HOUR, 23);
+        cal.set(cal.MINUTE, 59);
+        cal.set(cal.SECOND, 59);
+
+        Date endTime = new Date(cal.getTimeInMillis());
 
         /*
         int startYear = 2015;
@@ -156,7 +193,7 @@ public class MainActivity extends ActionBarActivity {
         enddate.setTime(cal.getTimeInMillis());
         */
 
-        return calendarLoader.loadCalendar(startdate, enddate);
+        return calendarLoader.loadCalendar(startTime, endTime);
     }
 
     private void sendMessages(LinkedList<TimedMessage> timedMessages) {

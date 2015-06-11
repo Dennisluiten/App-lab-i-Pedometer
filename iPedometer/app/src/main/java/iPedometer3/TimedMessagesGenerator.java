@@ -9,7 +9,7 @@ import java.util.ListIterator;
  *
  * Created by Hans-Christiaan on 26-5-2015.
  */
-public class TimedMessagesGenerator {
+public class TimedMessagesGenerator extends AbstractTimedMessageGenerator {
 
     // TODO: Waardes bepalen, deze zijn willekeurige placeholders.
     private static final int MAX_CYCLING_DURATION = 5000;
@@ -18,10 +18,8 @@ public class TimedMessagesGenerator {
     private static final int WALK_AROUND_BLOCK_TIME = 10000;
     private static final int DESK_EXERCISE_TIME = 10000;
 
-    private MessageGenerator msg_gen;
-
     public TimedMessagesGenerator(RandomCollection<PersuasionType> userSusceptibilityScores) {
-        msg_gen = new MessageGenerator(userSusceptibilityScores);
+        super(userSusceptibilityScores);
     }
 
     public LinkedList<TimedMessage> generateTimedMessages(
@@ -31,7 +29,7 @@ public class TimedMessagesGenerator {
 
         for(MovesBlock mb : movesBlocks)
         {
-            // TODO: altijd checken of gebruiker geen afspraak in agenda heeft tijdens versturen bericht.
+            // TODO: "funny" berichten genereren!!!
             // Check wanneer er berichten verstuurd kunnen worden
             // en voeg deze toe aan de te vertsuren berichten.
             betweenEventsMessage(mb, messages, calendarEvents);
