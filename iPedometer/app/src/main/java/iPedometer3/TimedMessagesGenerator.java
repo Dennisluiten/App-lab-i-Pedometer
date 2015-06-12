@@ -11,12 +11,14 @@ import java.util.ListIterator;
  */
 public class TimedMessagesGenerator extends AbstractTimedMessageGenerator {
 
-    // TODO: Waardes bepalen, deze zijn willekeurige placeholders.
-    private static final int MAX_CYCLING_DURATION = 5000;
-    private static final int MAX_WALKING_DURATION = 2500;
-    private static final int MSG_TIME_OFFSET = 500;
-    private static final int WALK_AROUND_BLOCK_TIME = 10000;
-    private static final int DESK_EXERCISE_TIME = 10000;
+    /** Een minuut in milliseconden. */
+    private static final int MINUTE = 600;
+    // Tijd is in milliseconden.
+    private static final int MAX_CYCLING_DURATION = 20 * MINUTE;
+    private static final int MAX_WALKING_DURATION = 10 * MINUTE;
+    private static final int MSG_TIME_OFFSET = 5 * MINUTE;
+    private static final int WALK_AROUND_BLOCK_TIME = 30 * MINUTE;
+    private static final int DESK_EXERCISE_TIME = 10 * MINUTE;
 
     public TimedMessagesGenerator(RandomCollection<PersuasionType> userSusceptibilityScores) {
         super(userSusceptibilityScores);
