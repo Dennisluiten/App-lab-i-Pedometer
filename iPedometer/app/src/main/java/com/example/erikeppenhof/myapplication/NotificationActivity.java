@@ -87,6 +87,7 @@ public class NotificationActivity extends ActionBarActivity {
             public void onClick(DialogInterface dialog, int id) {
                 // Snooze
                 //TODO: save in database
+                //TODO: Rework snoozing.
                 mHandler.sendEmptyMessageDelayed(DISPLAY_DATA, snoozetime);
             }
         });
