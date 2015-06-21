@@ -185,6 +185,42 @@ public class Json implements Runnable {
         return (ArrayList<String>) list;
     }
 
+    public ArrayList<Integer> parseSteps(JSONObject jsonObject, String jsonString, String jsonString2, String jsonString3) throws JSONException {
+        List<Integer> list = new ArrayList<>();
+        JSONArray array = jsonObject.getJSONArray(jsonString);
+        Log.d("JSONstring1", array.toString());
+        for(int i = 0 ; i < array.length() ; i++) {
+            JSONArray array2 = array.getJSONObject(i).getJSONArray(jsonString2);
+            Log.d("JSONstring21", array2.toString());
+            for(int j = 0 ; j < array2.length() ; j++){
+                String group = array2.getJSONObject(j).getString("group");
+                if(group.equals("running") || group.equals("walking")) {
+                    Log.d("JSONstring3", array2.getJSONObject(j).getString(jsonString3));
+                    list.add(array2.getJSONObject(j).getInt(jsonString3));
+                }
+            }
+        }
+        return (ArrayList<Integer>) list;
+    }
+
+    public ArrayList<String> parseTime(JSONObject jsonObject, String jsonString, String jsonString2, String jsonString3) throws JSONException {
+        List<String> list = new ArrayList<>();
+        JSONArray array = jsonObject.getJSONArray(jsonString);
+        Log.d("JSONstring1", array.toString());
+        for(int i = 0 ; i < array.length() ; i++) {
+            JSONArray array2 = array.getJSONObject(i).getJSONArray(jsonString2);
+            Log.d("JSONstring21", array2.toString());
+            for(int j = 0 ; j < array2.length() ; j++){
+                String group = array2.getJSONObject(j).getString("group");
+                if(group.equals("running") || group.equals("walking")) {
+                    Log.d("JSONstring3", array2.getJSONObject(j).getString(jsonString3));
+                    list.add(array2.getJSONObject(j).getString(jsonString3));
+                }
+            }
+        }
+        return (ArrayList<String>) list;
+    }
+
     public int getSteps() throws JSONException {
         int steps = 0;
         JSONArray summary = jsonObject.getJSONArray("summary");

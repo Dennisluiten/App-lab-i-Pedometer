@@ -31,6 +31,28 @@ public class MovesLoader {
         this.access_token = access_token;
     }
 
+    public ArrayList<Integer> amountSteps(String day) throws InterruptedException, JSONException {
+        Json json = getJsonDate(day);
+
+        new Thread(json).start();
+
+        Thread.sleep(4000);
+
+        JSONObject jsonObject = json.getJSONObject();
+        return json.parseSteps(jsonObject, "segments", "activities", "steps");
+    }
+
+    public ArrayList<String> getTime(String day, String time) throws InterruptedException, JSONException {
+        Json json = getJsonDate(day);
+
+        new Thread(json).start();
+
+        Thread.sleep(4000);
+
+        JSONObject jsonObject = json.getJSONObject();
+        return json.parseTime(jsonObject, "segments", "activities", time);
+    }
+
     public LinkedList<MovesBlock> getStoryLine(long day) throws InterruptedException, JSONException {
         LinkedList<MovesBlock> storyLine = new LinkedList<MovesBlock>();
         Json json = getJson(day);
@@ -118,6 +140,19 @@ public class MovesLoader {
         Date d = new Date();
         d.setTime(day);
         String date = sdf.format(d);
+        // Make request
+        String baseurl = "https://api.moves-app.com/api/1.1";
+        String act = baseurl + "/user/activities/daily/" + date + "?access_token=" + access_token;
+        //List<NameValuePair> params = new ArrayList<NameValuePair>();
+        //params.add(new BasicNameValuePair("access_token=", access_token));
+        // Create JSONObject
+        boolean get = true;
+        boolean post = false;
+
+        return new Json(act, get);
+    }
+
+    public Json getJsonDate(String date) {
         // Make request
         String baseurl = "https://api.moves-app.com/api/1.1";
         String act = baseurl + "/user/activities/daily/" + date + "?access_token=" + access_token;

@@ -14,7 +14,12 @@ import android.widget.TextView;
 
 import org.json.JSONException;
 
+import java.lang.reflect.Array;
 import java.sql.Time;
+import java.sql.Timestamp;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Calendar;
 import java.util.LinkedList;
@@ -98,14 +103,59 @@ public class MainActivity extends ActionBarActivity {
 
         updateSteps();
 
+        try {
+            saveStepsToDatabase(movesLoader);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+
         Log.d("MainActivityStoryLine", String.valueOf(storyLine.size()));
         MovesBlock movesBlock;
         if ( storyLine.size() > 0 ) {
             movesBlock = storyLine.get(0);
             Log.d("MainActivityStoryLine", "Start: " + movesBlock.getStartTime() + ", End: " + movesBlock.getEndTime());
         }
-
+        isToday = false;
         //CalendarIntegration ci = new CalendarIntegration(this);
+    }
+    private String[] dates = {"20150622", "20150623", "20150624", "20150625", "20150626", "20150627", "20150628", "20150629", "20150630", "20150701", "20150702", "20150703", "20150704", "20150705", "20150706", "20150707" ,"20150708", "20150709", "20150710"};
+    private boolean isToday = false;
+
+    public void saveStepsToDatabase(MovesLoader ml) throws JSONException, InterruptedException, ParseException {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
+        Date d = new Date();
+        d.setTime(System.currentTimeMillis());
+        String date = sdf.format(d);
+
+        ArrayList<Integer> steps = new ArrayList<>();
+        ArrayList<String> start = new ArrayList<>();
+        ArrayList<String> end = new ArrayList<>();
+
+        for (int i = 0; i < dates.length; i++) {
+            if (!isToday) {
+                if (date.equals(dates[i])) {
+                    isToday = true;
+                }
+                steps = ml.amountSteps(dates[i]);
+                start = ml.getTime(dates[i], "startTime");
+                end = ml.getTime(dates[i], "endTime");
+            }
+        }
+        // TODO: should be checked if steps are not yet logged, now everything gets saved many times (don't know how to solve this yet)
+        if (steps.size() == start.size() && start.size() == end.size()) {
+            for(int i = 0 ; i < steps.size() ; i++) {
+                SimpleDateFormat changeFormat = new SimpleDateFormat("yyyyMMdd'T'HHmmssZ");
+                Date date_st = (Date) changeFormat.parse(start.get(i));
+                Timestamp st = new Timestamp(date_st.getTime());
+                Date date_et = (Date) changeFormat.parse(end.get(i));
+                Timestamp et = new Timestamp(date_et.getTime());
+                server.sendStepLog(this.getIntent().getStringExtra("email"), steps.get(i), st, et);
+            }
+        }
     }
 
     @Override
