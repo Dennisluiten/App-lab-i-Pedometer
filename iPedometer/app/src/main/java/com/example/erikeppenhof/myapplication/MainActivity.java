@@ -34,28 +34,18 @@ public class MainActivity extends ActionBarActivity {
     private final static int CHECK_PER_N_MINUTES = 5;
     private boolean sendingStopped;
 
+    private String access_token;
+    private MovesLoader movesLoader;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        //Log.d("ProfileIntent", "Profile OnCreate");
-        Intent myIntent = this.getIntent();
-        String access_token = myIntent.getStringExtra("access_token");
+        Log.d("MainActivity", "MainActivity Started");
 
-
-
-        //Log.d("ProfileIntent", myIntent.getStringExtra("access_token"));
-        //String profile = getString(R.string.baseurl) + getString(R.string.profile);
-        //List<NameValuePair> params = new ArrayList<NameValuePair>();
-        //params.add(new BasicNameValuePair("access_token=", myIntent.getStringExtra("access_token")));
-        //Json json = new Json(profile, true);
-        //new Thread(json).start();
-        //try {
-        //    wait();
-        //} catch (InterruptedException e) {
-        //    e.printStackTrace();
-        //}
+        //access_token = MainApp.server.getAccessToken(this.getIntent().getStringExtra("email"));
+        access_token = this.getIntent().getStringExtra("access_token");
 
         // Load the susceptibility scores of the user
         // (how well they score on 'Authority', 'Commitment' etc. on the survey).
@@ -64,7 +54,7 @@ public class MainActivity extends ActionBarActivity {
         // Load the events from the calendar
         LinkedList<CalendarEvent> calendarEvents = loadCalendarData();
 
-        MovesLoader movesLoader = new MovesLoader(access_token);
+        movesLoader = new MovesLoader(access_token);
         LinkedList<MovesBlock> storyLine = loadMovesData(movesLoader);
 
         LinkedList<TimedMessage> timedMessages;
@@ -72,6 +62,7 @@ public class MainActivity extends ActionBarActivity {
         // TODO: bepalen wanneer de gebruiker is begonnen met de studie?
         int startDay = 15;
         Calendar cal = Calendar.getInstance();
+
         if(cal.get(Calendar.DAY_OF_MONTH) <= startDay + 7)
         {
             // Eerste week -> willekeurige berichten
@@ -95,7 +86,25 @@ public class MainActivity extends ActionBarActivity {
 
         sendMessages(timedMessages);
 
+        updateSteps();
 
+        Log.d("MainActivityStoryLine", String.valueOf(storyLine.size()));
+        MovesBlock movesBlock;
+        if ( storyLine.size() > 0 ) {
+            movesBlock = storyLine.get(0);
+            Log.d("MainActivityStoryLine", "Start: " + movesBlock.getStartTime() + ", End: " + movesBlock.getEndTime());
+        }
+
+        //CalendarIntegration ci = new CalendarIntegration(this);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        updateSteps();
+    }
+
+    private void updateSteps() {
         Json json = movesLoader.getJson(System.currentTimeMillis());
         new Thread(json).start();
         try {
@@ -109,22 +118,11 @@ public class MainActivity extends ActionBarActivity {
         } catch (JSONException e) {
             e.printStackTrace();
         }
-
         Log.d("MainActivitySteps", String.valueOf(steps));
         TextView textView = (TextView)findViewById(R.id.steps);
         String st = getResources().getString(R.string.stappen);
         String stappen = String.format(st, steps);
         textView.setText(stappen);
-
-
-        Log.d("MainActivityStoryLine", String.valueOf(storyLine.size()));
-        MovesBlock movesBlock;
-        if ( storyLine.size() > 0 ) {
-            movesBlock = storyLine.get(0);
-            Log.d("MainActivityStoryLine", "Start: " + movesBlock.getStartTime() + ", End: " + movesBlock.getEndTime());
-        }
-
-        //CalendarIntegration ci = new CalendarIntegration(this);
     }
 
     private boolean inControlGroup()

@@ -105,13 +105,7 @@ public class Authorization extends Activity {
                 Json json = new Json(profile, post, params);
                 Thread j = new Thread(json);
                 j.start();
-                //try {
-                //    while(json.getJSONObject() == null) {
-                //        wait();
-                //    }
-                //} catch (InterruptedException e) {
-                //    e.printStackTrace();
-                //}
+
                 try {
                     Thread.sleep(4000);
                 } catch (InterruptedException e) {
@@ -129,9 +123,10 @@ public class Authorization extends Activity {
 
                 //TODO: save access_token to database
 
+
                 Intent intent = new Intent(Authorization.this, LoginActivity.class);
-                intent.putExtra("access_token", access_token);
-                Authorization.this.startActivity(intent) ;
+                intent.putExtra("access_token", access_token); // TODO: when access_token saved, remove this
+                startActivity(intent);
         }
 
     }

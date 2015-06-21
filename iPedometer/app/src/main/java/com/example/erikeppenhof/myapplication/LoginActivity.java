@@ -25,9 +25,10 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import junit.framework.Test;
+
 import java.util.ArrayList;
 import java.util.List;
-
 
 /**
  * A login screen that offers login via email/password.
@@ -51,6 +52,7 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
     private EditText mPasswordView;
     private View mProgressView;
     private View mLoginFormView;
+    private String email;
 
     private String access_token = null;
 
@@ -59,8 +61,8 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-        Intent thisIntent = this.getIntent();
-        access_token = thisIntent.getStringExtra("access_token");
+        // TODO: connect with server
+        // server = MainApp.server;
 
         // Set up the login form.
         mEmailView = (AutoCompleteTextView) findViewById(R.id.email);
@@ -110,7 +112,7 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
         mPasswordView.setError(null);
 
         // Store values at the time of the login attempt.
-        String email = mEmailView.getText().toString();
+        email = mEmailView.getText().toString();
         String password = mPasswordView.getText().toString();
 
         boolean cancel = false;
@@ -142,6 +144,9 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
         } else {
             // Show a progress spinner, and kick off a background task to
             // perform the user login attempt.
+
+            //access_token = server.getAccessToken(email);
+            access_token = this.getIntent().getStringExtra("access_token");
             showProgress(true);
             mAuthTask = new UserLoginTask(email, password);
             mAuthTask.execute((Void) null);
@@ -293,7 +298,8 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
             if (success) {
                 finish();
                 Intent myIntent = new Intent(LoginActivity.this, MainActivity.class);
-                myIntent.putExtra("access_token", access_token);
+                myIntent.putExtra("email", email);
+                myIntent.putExtra("access_token", access_token); // TODO: when access_token saved, remove this
                 LoginActivity.this.startActivity(myIntent) ;
             } else {
                 mPasswordView.setError(getString(R.string.error_incorrect_password));

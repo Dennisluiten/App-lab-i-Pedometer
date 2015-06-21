@@ -4,12 +4,14 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import com.example.erikeppenhof.myapplication.R;
-
 public class MainApp extends ActionBarActivity {
+
+    // TODO: connection with server
+    // public static TestServerClass server;
 
     //TODO: is this right?
     private static final int INSTRUCTIONS_CODE = 1;
@@ -20,21 +22,27 @@ public class MainApp extends ActionBarActivity {
         setContentView(R.layout.activity_main_app);
         SharedPreferences settings = getSharedPreferences("prefs", 0);
         boolean firstRun = settings.getBoolean("firstRun", true);
+
+        //TODO: connect to server
+        //TestServerClass server = new TestServerClass();
+
+        // Only run authorization if it's the first run
         if ( firstRun )
         {
+            Log.d("MainApp", "firstrun");
+            Intent intent = new Intent(MainApp.this, Authorization.class);
+
             // here run your first-time instructions, for example :
             startActivityForResult(
-                    new Intent(MainApp.this, Authorization.class),
+                    intent,
                     INSTRUCTIONS_CODE);
 
+
         }
-        else {
+        else {  // Else continue with Login
+            Log.d("MainApp", "not firstrun");
             Intent intent = new Intent(MainApp.this, LoginActivity.class);
 
-            //TODO: get access_token from database
-
-            String access_token = "";
-            intent.putExtra("access_token", access_token);
             MainApp.this.startActivity(intent) ;
         }
     }
