@@ -25,6 +25,7 @@ import iPedometer3.MovesLoader;
 import iPedometer3.PersuasionType;
 import iPedometer3.RandomCollection;
 import iPedometer3.RandomTimedMessagesGenerator;
+import iPedometer3.ServerConnector;
 import iPedometer3.TimedMessage;
 import iPedometer3.TimedMessagesGenerator;
 
@@ -37,15 +38,18 @@ public class MainActivity extends ActionBarActivity {
     private String access_token;
     private MovesLoader movesLoader;
 
+    private ServerConnector server;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        server = MainApp.server;
+
         Log.d("MainActivity", "MainActivity Started");
 
-        //access_token = MainApp.server.getAccessToken(this.getIntent().getStringExtra("email"));
-        access_token = this.getIntent().getStringExtra("access_token");
+        access_token = server.getAccessToken(this.getIntent().getStringExtra("email"));
 
         // Load the susceptibility scores of the user
         // (how well they score on 'Authority', 'Commitment' etc. on the survey).
@@ -251,6 +255,7 @@ public class MainActivity extends ActionBarActivity {
                         PendingIntent.FLAG_UPDATE_CURRENT
                 );
         resultIntent.putExtra("notification", notification);
+        resultIntent.putExtra("email", this.getIntent().getStringExtra("email"));
         mBuilder.setContentIntent(resultPendingIntent);
 
         int mNotificationID = 001;

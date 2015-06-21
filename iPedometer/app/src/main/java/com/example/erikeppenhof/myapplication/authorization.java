@@ -157,4 +157,3 @@ public class Authorization extends Activity {
     }
 
 }
-

@@ -8,10 +8,11 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import iPedometer3.ServerConnector;
+
 public class MainApp extends ActionBarActivity {
 
-    // TODO: connection with server
-    // public static TestServerClass server;
+    public static ServerConnector server;
 
     //TODO: is this right?
     private static final int INSTRUCTIONS_CODE = 1;
@@ -23,8 +24,7 @@ public class MainApp extends ActionBarActivity {
         SharedPreferences settings = getSharedPreferences("prefs", 0);
         boolean firstRun = settings.getBoolean("firstRun", true);
 
-        //TODO: connect to server
-        //TestServerClass server = new TestServerClass();
+        server = new ServerConnector();
 
         // Only run authorization if it's the first run
         if ( firstRun )

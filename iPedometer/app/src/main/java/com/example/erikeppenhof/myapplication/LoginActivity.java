@@ -30,6 +30,8 @@ import junit.framework.Test;
 import java.util.ArrayList;
 import java.util.List;
 
+import iPedometer3.ServerConnector;
+
 /**
  * A login screen that offers login via email/password.
  */
@@ -55,6 +57,7 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
     private String email;
 
     private String access_token = null;
+    private ServerConnector server;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,7 +65,7 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
         setContentView(R.layout.activity_login);
 
         // TODO: connect with server
-        // server = MainApp.server;
+        server = MainApp.server;
 
         // Set up the login form.
         mEmailView = (AutoCompleteTextView) findViewById(R.id.email);
@@ -145,8 +148,8 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
             // Show a progress spinner, and kick off a background task to
             // perform the user login attempt.
 
-            //access_token = server.getAccessToken(email);
-            access_token = this.getIntent().getStringExtra("access_token");
+            access_token = server.getAccessToken(email);
+            //access_token = this.getIntent().getStringExtra("access_token");
             showProgress(true);
             mAuthTask = new UserLoginTask(email, password);
             mAuthTask.execute((Void) null);
@@ -300,7 +303,7 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
                 Intent myIntent = new Intent(LoginActivity.this, MainActivity.class);
                 myIntent.putExtra("email", email);
                 myIntent.putExtra("access_token", access_token); // TODO: when access_token saved, remove this
-                LoginActivity.this.startActivity(myIntent) ;
+                startActivity(myIntent) ;
             } else {
                 mPasswordView.setError(getString(R.string.error_incorrect_password));
                 mPasswordView.requestFocus();

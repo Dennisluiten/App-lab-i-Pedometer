@@ -17,6 +17,11 @@ import android.view.MenuItem;
 
 import com.example.erikeppenhof.myapplication.R;
 
+import java.sql.Timestamp;
+import java.util.Calendar;
+
+import iPedometer3.ServerConnector;
+
 public class NotificationActivity extends ActionBarActivity {
 
     final Context context = this;
@@ -25,11 +30,15 @@ public class NotificationActivity extends ActionBarActivity {
 
     private int snoozetime = 60000*30; // half an hour
 
+    private String email;
+
+    private ServerConnector server = MainApp.server;
+
     private Handler mHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
             if (msg.what == DISPLAY_DATA) {
-                onCreateDialog().show();
+                onCreateDialog(email).show();
             }
         }
     };
@@ -39,8 +48,10 @@ public class NotificationActivity extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_notification);
 
+        email = this.getIntent().getStringExtra("email");
+
         // SHOW POP_UP
-        Dialog dialog = onCreateDialog();
+        Dialog dialog = onCreateDialog(email);
         dialog.show();
     }
 
@@ -67,26 +78,38 @@ public class NotificationActivity extends ActionBarActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    public Dialog onCreateDialog() {
+    public Dialog onCreateDialog(final String email) {
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
-        builder.setMessage(this.getIntent().getStringExtra("notification")).setTitle(R.string.dialog_title);
+
+        // 1) create a java calendar instance
+        Calendar calendar = Calendar.getInstance();
+
+// 2) get a java.util.Date from the calendar instance.
+//    this date will represent the current instant, or "now".
+        java.util.Date now = calendar.getTime();
+
+// 3) a java current time (now) instance
+        final java.sql.Timestamp currentTimestamp = new java.sql.Timestamp(now.getTime());
+
+        final String notification = this.getIntent().getStringExtra("notification");
+        builder.setMessage(notification).setTitle(R.string.dialog_title);
         builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int id) {
-                // TODO: Cancel (save in database)
+                server.messageSent(email, notification, -1, currentTimestamp);
             }
         });
         builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int id) {
-                // TODO: OK (save in database)
+                server.messageSent(email, notification, 0, currentTimestamp);
             }
         });
         builder.setNeutralButton(R.string.snooze, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int id) {
                 // Snooze
-                //TODO: save in database
+                server.messageSent(email, notification, 1, currentTimestamp);
                 mHandler.sendEmptyMessageDelayed(DISPLAY_DATA, snoozetime);
             }
         });
