@@ -19,6 +19,8 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
+import iPedometer3.ServerConnector;
+
 public class Authorization extends Activity {
 
     private static final String CLIENT_ID = "yilMNmjo803XfXhwoQ76sre9Ozlx3Soc";
@@ -121,11 +123,8 @@ public class Authorization extends Activity {
                 }
                 Log.d("MainActivityTest", access_token);
 
-                //TODO: save access_token to database
-
-
                 Intent intent = new Intent(Authorization.this, LoginActivity.class);
-                intent.putExtra("access_token", access_token); // TODO: when access_token saved, remove this
+                intent.putExtra("access_token", access_token);
                 startActivity(intent);
         }
 

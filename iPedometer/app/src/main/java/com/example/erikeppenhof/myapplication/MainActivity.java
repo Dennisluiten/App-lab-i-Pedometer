@@ -112,7 +112,7 @@ public class MainActivity extends ActionBarActivity {
         Json json = movesLoader.getJson(System.currentTimeMillis());
         new Thread(json).start();
         try {
-            Thread.sleep(6000);
+            Thread.sleep(4000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }

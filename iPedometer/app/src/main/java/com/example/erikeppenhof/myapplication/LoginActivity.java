@@ -57,15 +57,12 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
     private String email;
 
     private String access_token = null;
-    private ServerConnector server;
+    private ServerConnector server = MainApp.server;;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
-
-        // TODO: connect with server
-        server = MainApp.server;
 
         // Set up the login form.
         mEmailView = (AutoCompleteTextView) findViewById(R.id.email);
@@ -147,8 +144,12 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
         } else {
             // Show a progress spinner, and kick off a background task to
             // perform the user login attempt.
-
-            access_token = server.getAccessToken(email);
+            if(MainApp.fRun) {
+                access_token = this.getIntent().getStringExtra("access_token");
+            }
+            else {
+                access_token = server.getAccessToken(email);
+            }
             //access_token = this.getIntent().getStringExtra("access_token");
             showProgress(true);
             mAuthTask = new UserLoginTask(email, password);
@@ -280,7 +281,7 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
             } catch (InterruptedException e) {
                 return false;
             }
-
+            // TODO: change dummy_credentials to data from database
             for (String credential : DUMMY_CREDENTIALS) {
                 String[] pieces = credential.split(":");
                 if (pieces[0].equals(mEmail)) {
@@ -289,7 +290,10 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
                 }
             }
 
-            // TODO: register the new account here.
+            if (server.getAccessToken(mEmail) == null) {
+                server.newUser(mEmail, access_token, mPassword);
+            }
+
             return false;
         }
 
@@ -302,7 +306,6 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
                 finish();
                 Intent myIntent = new Intent(LoginActivity.this, MainActivity.class);
                 myIntent.putExtra("email", email);
-                myIntent.putExtra("access_token", access_token); // TODO: when access_token saved, remove this
                 startActivity(myIntent) ;
             } else {
                 mPasswordView.setError(getString(R.string.error_incorrect_password));
