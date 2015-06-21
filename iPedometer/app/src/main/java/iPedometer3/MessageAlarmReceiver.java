@@ -18,8 +18,10 @@ public class MessageAlarmReceiver extends BroadcastReceiver {
 
     public void onReceive(Context context, Intent intent) {
         String message = intent.getStringExtra("MESSAGE");
+        String userId = intent.getStringExtra("USER_ID");
         Intent service = new Intent(context, MessageSendingService.class);
         service.putExtra("MESSAGE", message);
+        service.putExtra("USER_ID", userId);
         context.startService(service);
     }
 

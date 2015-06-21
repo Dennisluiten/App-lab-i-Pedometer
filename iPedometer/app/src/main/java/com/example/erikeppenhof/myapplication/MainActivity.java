@@ -97,7 +97,9 @@ public class MainActivity extends ActionBarActivity {
             }
         }
 
-        sendMessagesNew(timedMessages);
+        //TODO: Geef user-ID van huidige user mee om data te kunnen loggen.
+        String userID = "123";
+        sendMessagesNew(timedMessages, userID);
 
 
         Json json = movesLoader.getJson(System.currentTimeMillis());
@@ -200,7 +202,7 @@ public class MainActivity extends ActionBarActivity {
         return calendarLoader.loadCalendar(startTime, endTime);
     }
 
-    private void sendMessagesNew(LinkedList<TimedMessage> timedMessages) {
+    private void sendMessagesNew(LinkedList<TimedMessage> timedMessages, String userId) {
 
         // source: http://karanbalkar.com/2013/07/tutorial-41-using-alarmmanager-and-broadcastreceiver-in-android/
         for(TimedMessage m : timedMessages) {
@@ -208,6 +210,8 @@ public class MainActivity extends ActionBarActivity {
             // Put the message in the intent so the MessageAlarmReceiver can route it to
             // the MessageSendingService, which puts it in the notification.
             messageIntent.putExtra("MESSAGE", m.getMessage().toString());
+            // For logging info when a button on the message dialog is pressed.
+            messageIntent.putExtra("USER_ID", userId);
 
             PendingIntent resultIntent = PendingIntent.getBroadcast(MainActivity.this, 0, messageIntent, 0);
             // Set the notification to be sent at the right time using the alarm manager.

@@ -70,6 +70,7 @@ public class NotificationActivity extends ActionBarActivity {
     public Dialog onCreateDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         builder.setMessage(this.getIntent().getStringExtra("notification")).setTitle(R.string.dialog_title);
+        String userId = this.getIntent().getStringExtra("userId");
         builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int id) {

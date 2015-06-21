@@ -37,6 +37,7 @@ public class MessageSendingService extends Service {
         super.onStartCommand(intent, flags, startID);
 
         String notification = intent.getStringExtra("MESSAGE");
+        String userId = intent.getStringExtra("USER_ID");
 
         Context app_con = this.getApplicationContext();
         messageManager = (NotificationManager) app_con.getSystemService(app_con.NOTIFICATION_SERVICE);
@@ -58,6 +59,8 @@ public class MessageSendingService extends Service {
                 );
 
         resultIntent.putExtra("notification", notification);
+        resultIntent.putExtra("userId", userId);
+
         mBuilder.setContentIntent(resultPendingIntent);
 
         messageManager.notify(0, mBuilder.build());
