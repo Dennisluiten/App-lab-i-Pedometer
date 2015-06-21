@@ -12,7 +12,9 @@ import iPedometer3.ServerConnector;
 
 public class MainApp extends ActionBarActivity {
 
-    public static ServerConnector server;
+    public static ServerConnector server = new ServerConnector();
+
+    public static boolean fRun = true;
 
     //TODO: is this right?
     private static final int INSTRUCTIONS_CODE = 1;
@@ -24,11 +26,10 @@ public class MainApp extends ActionBarActivity {
         SharedPreferences settings = getSharedPreferences("prefs", 0);
         boolean firstRun = settings.getBoolean("firstRun", true);
 
-        server = new ServerConnector();
-
         // Only run authorization if it's the first run
         if ( firstRun )
         {
+            fRun = true;
             Log.d("MainApp", "firstrun");
             Intent intent = new Intent(MainApp.this, Authorization.class);
 
@@ -40,6 +41,7 @@ public class MainApp extends ActionBarActivity {
 
         }
         else {  // Else continue with Login
+            fRun = false;
             Log.d("MainApp", "not firstrun");
             Intent intent = new Intent(MainApp.this, LoginActivity.class);
 
