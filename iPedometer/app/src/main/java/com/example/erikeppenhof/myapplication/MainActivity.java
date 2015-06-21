@@ -1,5 +1,6 @@
 package com.example.erikeppenhof.myapplication;
 
+import android.app.AlarmManager;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Intent;
@@ -13,6 +14,7 @@ import android.widget.TextView;
 
 import org.json.JSONException;
 
+import java.sql.Time;
 import java.util.Date;
 import java.util.Calendar;
 import java.util.LinkedList;
@@ -20,6 +22,7 @@ import java.util.LinkedList;
 import iPedometer3.AbstractTimedMessageGenerator;
 import iPedometer3.CalendarEvent;
 import iPedometer3.CalendarLoader;
+import iPedometer3.MessageAlarmReceiver;
 import iPedometer3.MovesBlock;
 import iPedometer3.MovesLoader;
 import iPedometer3.PersuasionType;
@@ -32,8 +35,9 @@ import iPedometer3.TimedMessagesGenerator;
 
 public class MainActivity extends ActionBarActivity {
 
-    private final static int CHECK_PER_N_MINUTES = 5;
+    public final static int CHECK_PER_N_MINUTES = 5;
     private boolean sendingStopped;
+    public static String str = "test";
 
     private String access_token;
     private MovesLoader movesLoader;
@@ -88,7 +92,9 @@ public class MainActivity extends ActionBarActivity {
             }
         }
 
-        sendMessages(timedMessages);
+        //TODO: Geef email van huidige user mee om data te kunnen loggen.
+        String email = "123";
+        sendMessagesNew(timedMessages, email);
 
         updateSteps();
 
@@ -198,22 +204,21 @@ public class MainActivity extends ActionBarActivity {
         return calendarLoader.loadCalendar(startTime, endTime);
     }
 
-    private void sendMessages(LinkedList<TimedMessage> timedMessages) {
-        Calendar now = Calendar.getInstance();
-        TimedMessage nextMessage = timedMessages.poll();
-        long currentTime = 0;
-        while(!sendingStopped) {
-            now = Calendar.getInstance();
-            currentTime = now.getTimeInMillis();
-            if(currentTime >= nextMessage.getTime()) {
-                CreateNotification(timedMessages.toString());
-            }
-            try{
-                wait(CHECK_PER_N_MINUTES * 60000);
-            }
-            catch(InterruptedException e) {
+    private void sendMessagesNew(LinkedList<TimedMessage> timedMessages, String email) {
 
-            }
+        // source: http://karanbalkar.com/2013/07/tutorial-41-using-alarmmanager-and-broadcastreceiver-in-android/
+        for(TimedMessage m : timedMessages) {
+            Intent messageIntent = new Intent(MainActivity.this, MessageAlarmReceiver.class);
+            // Put the message in the intent so the MessageAlarmReceiver can route it to
+            // the MessageSendingService, which puts it in the notification.
+            messageIntent.putExtra("MESSAGE", m.getMessage().toString());
+            // For logging info when a button on the message dialog is pressed.
+            messageIntent.putExtra("EMAIL", email);
+
+            PendingIntent resultIntent = PendingIntent.getBroadcast(MainActivity.this, 0, messageIntent, 0);
+            // Set the notification to be sent at the right time using the alarm manager.
+            AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
+            alarmManager.set(AlarmManager.RTC, m.getTime(), resultIntent);
         }
     }
 

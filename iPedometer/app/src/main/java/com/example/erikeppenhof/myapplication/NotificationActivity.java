@@ -84,15 +84,16 @@ public class NotificationActivity extends ActionBarActivity {
         // 1) create a java calendar instance
         Calendar calendar = Calendar.getInstance();
 
-// 2) get a java.util.Date from the calendar instance.
-//    this date will represent the current instant, or "now".
+        // 2) get a java.util.Date from the calendar instance.
+        //    this date will represent the current instant, or "now".
         java.util.Date now = calendar.getTime();
 
-// 3) a java current time (now) instance
+        // 3) a java current time (now) instance
         final java.sql.Timestamp currentTimestamp = new java.sql.Timestamp(now.getTime());
 
         final String notification = this.getIntent().getStringExtra("notification");
         builder.setMessage(notification).setTitle(R.string.dialog_title);
+
         builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int id) {
@@ -110,6 +111,7 @@ public class NotificationActivity extends ActionBarActivity {
             public void onClick(DialogInterface dialog, int id) {
                 // Snooze
                 server.messageSent(email, notification, 1, currentTimestamp);
+
                 mHandler.sendEmptyMessageDelayed(DISPLAY_DATA, snoozetime);
             }
         });

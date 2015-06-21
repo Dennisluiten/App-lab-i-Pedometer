@@ -1,5 +1,9 @@
 package iPedometer3;
 
+import android.content.Intent;
+
+import com.example.erikeppenhof.myapplication.NotificationActivity;
+
 /**
  * A persuasive message and the time that it needs to be send / has been send.
  *

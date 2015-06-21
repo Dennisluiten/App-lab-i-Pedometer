@@ -1,5 +1,7 @@
 package iPedometer3;
 
+import com.example.erikeppenhof.myapplication.MainActivity;
+
 import java.util.LinkedList;
 import java.util.ListIterator;
 
@@ -41,6 +43,7 @@ public class TimedMessagesGenerator extends AbstractTimedMessageGenerator {
             standMessage(messages, calendarEvents);
 
         }
+
         return messages;
     }
 
