@@ -4,6 +4,7 @@ import com.example.erikeppenhof.myapplication.MainActivity;
 
 import java.util.LinkedList;
 import java.util.ListIterator;
+import java.util.Random;
 
 /**
  * Makes a list of timed messages for a given day
@@ -14,7 +15,7 @@ import java.util.ListIterator;
 public class TimedMessagesGenerator extends AbstractTimedMessageGenerator {
 
     /** Een minuut in milliseconden. */
-    private static final int MINUTE = 600;
+    private static final int MINUTE = 60000;
     // Tijd is in milliseconden.
     private static final int MAX_CYCLING_DURATION = 20 * MINUTE;
     private static final int MAX_WALKING_DURATION = 10 * MINUTE;
@@ -35,7 +36,7 @@ public class TimedMessagesGenerator extends AbstractTimedMessageGenerator {
         {
             // TODO: "funny" berichten genereren!!!
             // Check wanneer er berichten verstuurd kunnen worden
-            // en voeg deze toe aan de te vertsuren berichten.
+            // en voeg deze toe aan de te versturen berichten.
             betweenEventsMessage(mb, messages, calendarEvents);
             walkCycleMessage(mb, messages);
             transportMessage(mb, messages);
@@ -43,6 +44,9 @@ public class TimedMessagesGenerator extends AbstractTimedMessageGenerator {
             standMessage(messages, calendarEvents);
 
         }
+
+        // Genereer één "funny"-bericht per dag.
+        funnyMessage(messages);
 
         return messages;
     }
@@ -179,5 +183,16 @@ public class TimedMessagesGenerator extends AbstractTimedMessageGenerator {
                     p_msg);
             messages.add(msg);
         }
+    }
+
+    private void funnyMessage(LinkedList<TimedMessage> messages)
+    {
+        Random random = new Random();
+
+        int hour = 10 + random.nextInt(6);
+        long message_time = hour * 3600000;
+
+        PersuasiveMessage p_msg = msg_gen.generateFunnyMessage();
+        messages.add(new TimedMessage(message_time, p_msg));
     }
 }

@@ -1,5 +1,7 @@
 package iPedometer3;
 
+import com.example.erikeppenhof.myapplication.MainApp;
+
 import java.util.LinkedList;
 import java.util.Random;
 
@@ -18,6 +20,8 @@ public class MessageGenerator {
 
     private RandomCollection<PersuasionType> userSusceptibilityScores;
 
+    private ServerConnector server;
+
     public MessageGenerator(RandomCollection<PersuasionType> userSusceptibilityScores)
     {
         authorityMessages = new LinkedList<PersuasivePart>();
@@ -28,12 +32,14 @@ public class MessageGenerator {
 
         this.userSusceptibilityScores = userSusceptibilityScores;
 
+        server = MainApp.server;
+
         loadMessages();
     }
 
     private void loadMessages()
     {
-        // TODO: Laden van het 'persuasion'-gedeelte van de berichten uit database en in de lists zetten.
+        /*
         consensusMessages.add(
                 new PersuasivePart("Minder dan 10% van de mensen is inactief.",
                         PersuasionType.CONSENSUS));
@@ -49,6 +55,21 @@ public class MessageGenerator {
         funnyMessages.add(
                 new PersuasivePart("Drink veel water waardoor je vaak naar het toilet moet; het liefst op een andere verdieping.",
                         PersuasionType.FUNNY));
+        */
+
+        LinkedList<PersuasivePart>[] all_messages = server.getAllMessages();
+
+        for(PersuasivePart part : all_messages[0])
+            authorityMessages.add(part);
+        for(PersuasivePart part : all_messages[1])
+            commitmentMessages.add(part);
+        for(PersuasivePart part : all_messages[2])
+            consensusMessages.add(part);
+        for(PersuasivePart part : all_messages[3])
+            funnyMessages.add(part);
+        for(PersuasivePart part : all_messages[4])
+            scarcityMessages.add(part);
+
     }
 
     public PersuasiveMessage generateMessage(String activityPart)
@@ -60,6 +81,7 @@ public class MessageGenerator {
         PersuasionType type = userSusceptibilityScores.takeWeightedSample();
 
         switch(type) {
+            case FUNNY:
             case CONSENSUS:
                 randomIndex = random.nextInt(consensusMessages.size());
                 msg = consensusMessages.get(randomIndex); break;
@@ -69,9 +91,6 @@ public class MessageGenerator {
             case AUTHORITY:
                 randomIndex = random.nextInt(authorityMessages.size());
                 msg = authorityMessages.get(randomIndex); break;
-            case FUNNY:
-                randomIndex = random.nextInt(funnyMessages.size());
-                msg = funnyMessages.get(randomIndex); break;
             case SCARCITY:
                 randomIndex = random.nextInt(scarcityMessages.size());
                 msg = scarcityMessages.get(randomIndex); break;
@@ -79,9 +98,14 @@ public class MessageGenerator {
                 randomIndex = random.nextInt(commitmentMessages.size());
                 msg = commitmentMessages.get(randomIndex); break;
         }
-        // Funny messages have already incorporated activity parts.
-        if(type == PersuasionType.FUNNY)
-            activityPart = "";
         return new PersuasiveMessage(msg, activityPart);
+    }
+
+    public PersuasiveMessage generateFunnyMessage()
+    {
+        Random random = new Random();
+        int randomIndex = random.nextInt(funnyMessages.size());
+        PersuasivePart msg = funnyMessages.get(randomIndex);
+        return new PersuasiveMessage(msg, "");
     }
 }

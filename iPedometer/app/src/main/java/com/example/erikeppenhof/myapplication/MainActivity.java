@@ -59,11 +59,12 @@ public class MainActivity extends ActionBarActivity {
         Log.d("MainActivity", "MainActivity Started");
 
         access_token = server.getAccessToken(this.getIntent().getStringExtra("email"));
+        String email = this.getIntent().getStringExtra("email");
 
         // Load the susceptibility scores of the user
         // (how well they score on 'Authority', 'Commitment' etc. on the survey).
         // Used to choose a persuasion strategy weighted for the user's score.
-        RandomCollection<PersuasionType> userScores = getUserSusceptibilityScores();
+        RandomCollection<PersuasionType> userScores = getUserSusceptibilityScores(email);
         // Load the events from the calendar
         LinkedList<CalendarEvent> calendarEvents = loadCalendarData();
 
@@ -73,10 +74,10 @@ public class MainActivity extends ActionBarActivity {
         LinkedList<TimedMessage> timedMessages;
 
         // TODO: bepalen wanneer de gebruiker is begonnen met de studie?
-        int startDay = 15;
+        int startDay = 24;
         Calendar cal = Calendar.getInstance();
 
-        if(cal.get(Calendar.DAY_OF_MONTH) <= startDay + 7)
+        if(cal.get(Calendar.DAY_OF_YEAR) <= (cal.get(Calendar.DAY_OF_YEAR) + 7))
         {
             // Eerste week -> willekeurige berichten
             AbstractTimedMessageGenerator generator = new RandomTimedMessagesGenerator(userScores);
@@ -85,7 +86,7 @@ public class MainActivity extends ActionBarActivity {
         else
         {
             // Tweede week
-            if(inControlGroup()) {
+            if(inControlGroup(email)) {
                 // Gebruiker zit in controlegroep, ga door met willekeurige berichten sturen.
                 AbstractTimedMessageGenerator generator = new TimedMessagesGenerator(userScores);
                 timedMessages = generator.generateTimedMessages(storyLine, calendarEvents);
@@ -97,8 +98,6 @@ public class MainActivity extends ActionBarActivity {
             }
         }
 
-        //TODO: Geef email van huidige user mee om data te kunnen loggen.
-        String email = "123";
         sendMessagesNew(timedMessages, email);
 
         updateSteps();
@@ -185,15 +184,23 @@ public class MainActivity extends ActionBarActivity {
         textView.setText(stappen);
     }
 
-    private boolean inControlGroup()
+    private boolean inControlGroup(String email)
     {
         //TODO: laad uit database of gebruiker in de controlegroep zit of niet.
         return false;
     }
 
-    private RandomCollection<PersuasionType> getUserSusceptibilityScores()
+    private RandomCollection<PersuasionType> getUserSusceptibilityScores(String email)
     {
-        return new RandomCollection<PersuasionType>();
+        ArrayList<Double> userWeights = server.getEnqueteWeights(email);
+        RandomCollection<PersuasionType> userScores = new RandomCollection<PersuasionType>();
+        // Worden de scores teruggegeven op alfabetische volgorde?
+        userScores.add(userWeights.get(0), PersuasionType.AUTHORITY);
+        userScores.add(userWeights.get(1), PersuasionType.COMMITMENT);
+        userScores.add(userWeights.get(2), PersuasionType.CONSENSUS);
+        userScores.add(userWeights.get(3), PersuasionType.SCARCITY);
+
+        return userScores;
     }
 
     private LinkedList<MovesBlock> loadMovesData(MovesLoader movesLoader)
