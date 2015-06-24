@@ -1,5 +1,4 @@
 package iPedometer3;
-
 import android.os.AsyncTask;
 
 import java.io.BufferedReader;
@@ -7,9 +6,9 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.net.UnknownHostException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -20,14 +19,11 @@ public class ServerConnector implements ServerInterface{
 
     private String urlstring = "http://applab.ai.ru.nl:8080/teamD/ServletTest2";
     private URLConnection conn;
-    private BufferedWriter writeToServer;
-    private String queryTemplate = String.format("SELECT returns FROM table WHERE conditions;");
-    private String insertTemplate = String.format("INSERT INTO table (variables) VALUES (values);");
-    private boolean serverResponded = false;
-    protected BufferedReader serverResponse;
+    protected ArrayList<String> serverResponse;
+    private ArrayList<String> responseStrings;
 
 
-    public static void main(String[] args) throws MalformedURLException, IOException {
+    public static void main(String[] args) throws IOException {
         new ServerConnector();
         System.out.println("Process terminated.");
     }
@@ -35,130 +31,83 @@ public class ServerConnector implements ServerInterface{
     public ServerConnector(){
     }
 
-    private void sendRequestToServer(String request) throws IOException{
-        serverResponded = false;
-        Requester  r = new Requester();
-        r.execute(request);
-        while(!serverResponded){
-            System.out.println("Thread going to sleep.");
-            try {
-                Thread.sleep(400);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
+    private BufferedReader actuallySendRequest(String request) throws IOException, UnknownHostException{
+        URL url = new URL(urlstring);
+        conn = url.openConnection();
+        conn.setDoOutput(true);
+        BufferedWriter out = new BufferedWriter( new OutputStreamWriter( conn.getOutputStream() ) );
+        out.write(request);
+        out.flush();
+        out.close();
+        return new BufferedReader( new InputStreamReader( conn.getInputStream() ) );
     }
 
     public boolean insert(String sql){
-        try {
-            sendRequestToServer("dbAction=insert&args="+sql);
-            String response;
-            if(serverResponse == null)
-                System.out.println("bufferedReader: serverResponse = null");
-            while ( (response = serverResponse.readLine()) != null ) {
-                System.out.println( response );
-                if(response.contains("successful")){
-                    serverResponse.close();
-                    return true;
-                }else if (response.contains("failed")){
-                    serverResponse.close();
-                    return false;
-                }
-            }
-            serverResponse.close();
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        System.out.println("DB response not recognized. Assuming fail.");
-        return false;
+        ArrayList<String> responses = sendRequestToServer(sql, "String", "insert");
+        if(responses.size()>1)
+            System.out.println("Multiple return values received while expecting 1.");
+        return responses.get(0).equalsIgnoreCase("success");
     }
 
-    public ArrayList<Double> queryArray(String sql){
-        ArrayList<Double> returnValues= new ArrayList<Double>();
-        try {
-            sendRequestToServer("dbAction=query&returnType=doubles&args="+sql);
-            String response;
-            while ( (response = serverResponse.readLine()) != null ) {
-                if(response.startsWith("return:")){
-                    returnValues.add(Double.parseDouble(response.substring(7)));
-                }
-                System.out.println( response );
-            }
-            serverResponse.close();
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        if(returnValues.isEmpty())
-            System.out.println("DB response not recognized. (arraylist double) Query failed.");
-        return returnValues;
+    /**
+     * Op dit moment alleen gebruikt door getEnqueteWeights. Vandaar de 5 elementen restrictie.
+     * @param sql String van de query.
+     * @return doubles
+     */
+    private double [] queryDoubles(String sql){
+        ArrayList<String> responses = sendRequestToServer(sql, "doubles", "query");
+        if(responses.get(0).startsWith("FAIL"))
+            return null;
+        double [] doubles = new double[5];
+        for(int i = 0; i < 5; i++)
+            doubles[i] = Double.parseDouble(responses.get(i));
+        return doubles;
     }
 
-    public int queryInt(String sql){
-        try {
-            sendRequestToServer("dbAction=query&returnType=int&args="+sql);
-            String response;
-            while ( (response = serverResponse.readLine()) != null ) {
-                if(response.startsWith("return:")){
-                    serverResponse.close();
-                    return Integer.parseInt(response.substring(7));
-                }
-                System.out.println( response );
-            }
-            serverResponse.close();
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        System.out.println("DB response not recognized. Query failed.");
-        return -1;
+    private int queryInt(String sql){
+        ArrayList<String> responses = sendRequestToServer(sql, "int", "query");
+        if(responses.size()>1)
+            System.out.println("Multiple return values received while expecting 1.");
+        if(responses.get(0).startsWith("FAIL"))
+            return -1;
+        return Integer.parseInt(responses.get(0));
     }
 
-    public String queryString(String sql, String returnType){
-        try {
-            sendRequestToServer("dbAction=query&returnType=" + returnType +"&args="+sql);
-            String response;
-            while ( (response = serverResponse.readLine()) != null ) {
-                if(response.startsWith("return:"))
-                    return response.substring(7);
-                System.out.println( response );
-            }
-            serverResponse.close();
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        System.out.println("DB response not recognized. Query failed.");
-        return null;
+    private String queryString(String sql){
+        ArrayList<String> responses = sendRequestToServer(sql, "String", "query");
+        if(responses.size()>1)
+            System.out.println("Multiple return values received while expecting 1.");
+        return responses.get(0);
     }
 
-    public String queryString(String sql){
-        return queryString(sql, "String");
+    private ArrayList<String> sendRequestToServer(String sql, String returnType, String action){
+        responseStrings = null;
+        new Requester().execute(sql, returnType, action);
+        while(responseStrings == null){
+            try {
+                System.out.println("Putting thread to sleep  for 400s");
+                Thread.sleep(400);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+           }
+        }
+        return responseStrings;
     }
 
     @Override//Werkt
     public String getAccessToken(String userEmail) {
-        return queryString(String.format("SELECT accesstoken FROM users WHERE email = '%s';", userEmail));
+        return queryString(String.format("SELECT accesstoken FROM users WHERE email = '%s' LIMIT 1;", userEmail));
     }
 
     @Override//Werkt
     public String getPassword(String userEmail) {
-        return queryString(String.format("SELECT password FROM users WHERE email = '%s';", userEmail));
+        return queryString(String.format("SELECT password FROM users WHERE email = '%s' LIMIT 1;", userEmail));
     }
 
     @Override // Werkt
-    public ArrayList<Double> getEnqueteWeights(String userEmail) {
-        return queryArray(String.format("SELECT weight FROM enqueteWeights WHERE userEmail = '%s';", userEmail));
+    public double [] getEnqueteWeights(String userEmail) {
+        return queryDoubles(String.format("SELECT weight FROM enqueteWeights WHERE userEmail = '%s' LIMIT 5;", userEmail));
     }
-
-
 
     @Override // Werkt
     public String getLastMessageTo(String userEmail) {
@@ -167,7 +116,7 @@ public class ServerConnector implements ServerInterface{
 
     @Override // Werkt
     public int stepsTakenBetween(String userEmail, Timestamp startTime, Timestamp endTime) {
-        return queryInt(String.format("SELECT sum(nrsteps) FROM stepslog WHERE userEmail = '%s' AND starttime > '%s' AND endtime < '%s';", userEmail, startTime, endTime ));
+        return queryInt(String.format("SELECT sum(nrsteps) FROM stepslog WHERE userEmail = '%s' AND starttime > '%s' AND endtime < '%s';", userEmail, startTime, endTime));
     }
 
     @Override //Werkt
@@ -179,8 +128,7 @@ public class ServerConnector implements ServerInterface{
     @Override //Werkt
     public boolean messageSent(String userEmail, String message, int response,
                                Timestamp time) {
-        System.out.println(String.format("INSERT INTO sentmessages (userEmail, message, response, time) VALUES ('%s','%s', %d,'%s')",userEmail, message, response, time));
-        return insert(String.format("INSERT INTO sentmessages (userEmail, message, response, time) VALUES ('%s','%s', %d,'%s');",userEmail, message, response, time));
+        return insert(String.format("INSERT INTO sentmessages (userEmail, message, response, timeSent) VALUES ('%s','%s', %d,'%s');", userEmail, message, response, time));
     }
 
     @Override // Werkt
@@ -194,9 +142,9 @@ public class ServerConnector implements ServerInterface{
         return null;
     }
 
-    @Override // TODO check of dit nog steeds werkt.
+    @Override // Werkt
     public boolean setMessageResponse(String userEmail, Timestamp responseTime, int response) {
-        return insert(String.format("UPDATE sentmessage SET responseTime = %s, response = %d WHERE userEmail = '%s' ORDER BY timestampID DESC LIMIT 1;", responseTime, response, userEmail));
+        return insert(String.format("UPDATE sentmessages SET timeResponded = '%s', response = %d WHERE userEmail = '%s' ORDER BY timestampID DESC LIMIT 1;", responseTime, response, userEmail));
 
     }
 
@@ -214,36 +162,34 @@ public class ServerConnector implements ServerInterface{
         else
             return false;
     }
-    private class Requester extends AsyncTask<String, Void, BufferedReader>{
 
-        public Requester(){
-            super();
-        }
+    private class Requester extends AsyncTask<String, Void, ArrayList<String>>{
 
         @Override
-        protected BufferedReader doInBackground(String... params) {
-            System.out.println("doInBackground starting");
+        protected ArrayList<String> doInBackground(String... params) {
+            ArrayList<String> responses = new ArrayList<String>();
             try {
-                URL url = new URL(urlstring);
-                conn = url.openConnection();
-                conn.setDoOutput(true);
-                writeToServer = new BufferedWriter( new OutputStreamWriter( conn.getOutputStream() ) );
-                String request = "";
-                for (String param : params) {
-                    request = param;
+                BufferedReader serverResponse = actuallySendRequest(String.format("dbAction=%s&returnType=%s&args=%s", params[2], params[1], params[0]));
+                String nextResponse;
+                while ((nextResponse = serverResponse.readLine()) != null) {
+                    if (nextResponse.startsWith("return:"))
+                        responses.add(nextResponse.substring(7));
+                    System.out.println(nextResponse);
                 }
+                serverResponse.close();
 
-                writeToServer.write(request);
-                writeToServer.flush();
-                writeToServer.close();
-                serverResponse =  new BufferedReader( new InputStreamReader( conn.getInputStream() ) );
-
-            } catch (IOException e) {
+            }catch (UnknownHostException e){
+                responses = new ArrayList<String>();
+                responses.add("FAIL due to UnknownHostException. Likely due to no internet connection.");
+                System.out.println(responses.get(0));
+            }   catch (IOException e) {
                 e.printStackTrace();
             }
-            serverResponded = true;
-            System.out.println("doInbackground finished");
-            return null;
+            if(responses.isEmpty()){
+                System.out.println("DB response not recognized. Query failed.");
+            }
+            responseStrings = responses;
+            return responses;
         }
     }
 }
