@@ -16,7 +16,6 @@ public class MainApp extends ActionBarActivity {
 
     public static boolean fRun = true;
 
-    //TODO: is this right?
     private static final int INSTRUCTIONS_CODE = 1;
 
     @Override

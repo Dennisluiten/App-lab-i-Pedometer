@@ -144,15 +144,17 @@ public class MainActivity extends ActionBarActivity {
                 end = ml.getTime(dates[i], "endTime");
             }
         }
-        // TODO: should be checked if steps are not yet logged, now everything gets saved many times (don't know how to solve this yet)
+
         if (steps.size() == start.size() && start.size() == end.size()) {
             for(int i = 0 ; i < steps.size() ; i++) {
                 SimpleDateFormat changeFormat = new SimpleDateFormat("yyyyMMdd'T'HHmmssZ");
-                Date date_st = (Date) changeFormat.parse(start.get(i));
+                Date date_st = changeFormat.parse(start.get(i));
                 Timestamp st = new Timestamp(date_st.getTime());
-                Date date_et = (Date) changeFormat.parse(end.get(i));
+                Date date_et = changeFormat.parse(end.get(i));
                 Timestamp et = new Timestamp(date_et.getTime());
-                server.sendStepLog(this.getIntent().getStringExtra("email"), steps.get(i), st, et);
+                if (!(server.stepsTakenBetween(this.getIntent().getStringExtra("email"), st, et) > 0)) {
+                    server.sendStepLog(this.getIntent().getStringExtra("email"), steps.get(i), st, et);
+                }
             }
         }
     }
@@ -192,13 +194,13 @@ public class MainActivity extends ActionBarActivity {
 
     private RandomCollection<PersuasionType> getUserSusceptibilityScores(String email)
     {
-        ArrayList<Double> userWeights = server.getEnqueteWeights(email);
+        double[] userWeights = server.getEnqueteWeights(email);
         RandomCollection<PersuasionType> userScores = new RandomCollection<PersuasionType>();
         // Worden de scores teruggegeven op alfabetische volgorde?
-        userScores.add(userWeights.get(0), PersuasionType.AUTHORITY);
-        userScores.add(userWeights.get(1), PersuasionType.COMMITMENT);
-        userScores.add(userWeights.get(2), PersuasionType.CONSENSUS);
-        userScores.add(userWeights.get(3), PersuasionType.SCARCITY);
+        userScores.add(userWeights[0], PersuasionType.AUTHORITY);
+        userScores.add(userWeights[1], PersuasionType.COMMITMENT);
+        userScores.add(userWeights[2], PersuasionType.CONSENSUS);
+        userScores.add(userWeights[3], PersuasionType.SCARCITY);
 
         return userScores;
     }
