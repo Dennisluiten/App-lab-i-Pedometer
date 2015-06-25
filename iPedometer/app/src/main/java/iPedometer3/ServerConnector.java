@@ -135,8 +135,20 @@ public class ServerConnector implements ServerInterface {
     }
 
     @Override // Werkt
-    public boolean newUser(String userEmail, String accesstoken, String password) {
-        return insert(String.format("INSERT INTO users (email, password, accesstoken) VALUES ('%s', '%s', '%s');", userEmail, password, accesstoken));
+    public boolean newUser(String userEmail, String accesstoken, String password, boolean controlGroup) {
+        int inControlGroup = 0;
+        if(controlGroup)
+            inControlGroup = 1;
+        return insert(String.format("INSERT INTO users (email, password, accesstoken, inControlGroup) VALUES ('%s', '%s', '%s', %d);", userEmail, password, accesstoken, inControlGroup));
+    }
+
+    @Override
+    public boolean isControlGroup(String userEmail) {
+        int i = queryInt(String.format("SELECT inControlGroup FROM users WHERE email = '%s' LIMIT 1;", userEmail));
+        if(i == 0)
+            return false;
+        else
+            return true;
     }
 
     @Override
