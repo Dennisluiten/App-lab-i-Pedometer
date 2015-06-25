@@ -6,6 +6,7 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.UnknownHostException;
@@ -14,8 +15,10 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Locale;
 
+import iPedometer3.ServerInterface;
 
-public class ServerConnector implements ServerInterface{
+
+public class ServerConnector implements ServerInterface {
 
     private String urlstring = "http://applab.ai.ru.nl:8080/teamD/ServletTest2";
     private URLConnection conn;
@@ -89,7 +92,7 @@ public class ServerConnector implements ServerInterface{
                 Thread.sleep(400);
             } catch (InterruptedException e) {
                 e.printStackTrace();
-           }
+            }
         }
         return responseStrings;
     }
@@ -137,9 +140,15 @@ public class ServerConnector implements ServerInterface{
     }
 
     @Override
-    public LinkedList<PersuasivePart>[] getAllMessages() {
-        // TODO Auto-generated method stub
-        return null;
+    public LinkedList<PersuasivePart> getAllMessages() {
+        ArrayList<String> content = sendRequestToServer("SELECT message FROM messages", "String", "query");
+        ArrayList<String> types = sendRequestToServer("SELECT type FROM messages", "String", "query");
+        LinkedList<PersuasivePart> messages = new LinkedList<PersuasivePart>();
+        for(int i = 0; i < content.size(); i++){
+            PersuasionType type = PersuasionType.valueOf(types.get(i).toUpperCase());
+            messages.add(new PersuasivePart(content.get(i), type));
+        }
+        return messages;
     }
 
     @Override // Werkt

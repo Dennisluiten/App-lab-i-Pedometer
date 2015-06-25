@@ -9,7 +9,7 @@ public interface ServerInterface {
     public String getAccessToken(String userEmail);
     public String getPassword(String userEmail);
     public double [] getEnqueteWeights(String userEmail);
-    public LinkedList<PersuasivePart> [] getAllMessages();
+    public LinkedList<PersuasivePart> getAllMessages();
     public String getLastMessageTo(String userEmail);
     public int stepsTakenBetween(String userEmail, Timestamp startTime, Timestamp endTime); //Type van argumenten is bespreekbaar.
 
