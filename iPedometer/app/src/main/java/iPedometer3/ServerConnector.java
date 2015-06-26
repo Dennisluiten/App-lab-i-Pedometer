@@ -80,6 +80,8 @@ public class ServerConnector implements ServerInterface {
         ArrayList<String> responses = sendRequestToServer(sql, "String", "query");
         if(responses.size()>1)
             System.out.println("Multiple return values received while expecting 1.");
+        else if (responses.size() == 0)
+            return "Results empty";
         return responses.get(0);
     }
 
@@ -169,6 +171,12 @@ public class ServerConnector implements ServerInterface {
 
     }
 
+    @Override
+    public boolean userRegistered(String userEmail) {
+        String response = queryString(String.format("SELECT email FROM users WHERE email = '%s' LIMIT 1;", userEmail));
+        return !response.equalsIgnoreCase("Results empty");
+    }
+
 
     @Override //Werkt
     public boolean setEnqueteWeights(String userEmail, double[] weights) {
@@ -205,9 +213,6 @@ public class ServerConnector implements ServerInterface {
                 System.out.println(responses.get(0));
             }   catch (IOException e) {
                 e.printStackTrace();
-            }
-            if(responses.isEmpty()){
-                System.out.println("DB response not recognized. Query failed.");
             }
             responseStrings = responses;
             return responses;

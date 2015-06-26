@@ -12,6 +12,7 @@ public interface ServerInterface {
     public String getLastMessageTo(String userEmail);
     public int stepsTakenBetween(String userEmail, Timestamp startTime, Timestamp endTime); //Type van argumenten is bespreekbaar.
     public boolean isControlGroup(String userEmail);
+    public boolean userRegistered(String userEmail);
 
     //Naar DB, returns booleans voor success.
     public boolean sendStepLog(String userEmail, int nrOfSteps, Timestamp startTime, Timestamp endTime);  //Type van argumenten is bespreekbaar.
