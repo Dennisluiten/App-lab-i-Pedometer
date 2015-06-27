@@ -20,6 +20,8 @@ public interface ServerInterface {
     public boolean setMessageResponse(String userEmail, Timestamp responseTime, int response);
     public boolean newUser(String userEmail, String accesstoken, String password, boolean controlGroup);
     public boolean setEnqueteWeights(String userEmail, double [] weights);
+    public boolean setStudyStartTime(String userEmail, Timestamp startTime);
+
 }
 
 

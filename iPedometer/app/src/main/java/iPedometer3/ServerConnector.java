@@ -180,6 +180,11 @@ public class ServerConnector implements ServerInterface {
             }
         }
         LinkedList<PersuasivePart> [] allMessages = (LinkedList<PersuasivePart>[]) new LinkedList<?> [5];
+        allMessages [0] = authority;
+        allMessages [1] = commitment;
+        allMessages [2] = consensus;
+        allMessages [3] = funny;
+        allMessages [4] = scarcity;
         return allMessages;
     }
 
@@ -208,6 +213,11 @@ public class ServerConnector implements ServerInterface {
             return true;
         else
             return false;
+    }
+
+    @Override
+    public boolean setStudyStartTime(String userEmail, Timestamp startTime) {
+        return insert(String.format("UPDATE users SET studyStartTime = '%s' WHERE email = '%s';", startTime, userEmail));
     }
 
     private class Requester extends AsyncTask<String, Void, ArrayList<String>>{
