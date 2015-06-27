@@ -188,8 +188,7 @@ public class MainActivity extends ActionBarActivity {
 
     private boolean inControlGroup(String email)
     {
-        //TODO: laad uit database of gebruiker in de controlegroep zit of niet.
-        return false;
+        return server.isControlGroup(email);
     }
 
     private RandomCollection<PersuasionType> getUserSusceptibilityScores(String email)

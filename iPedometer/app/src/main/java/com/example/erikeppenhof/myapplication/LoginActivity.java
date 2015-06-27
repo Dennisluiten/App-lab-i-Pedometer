@@ -39,11 +39,10 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
 
     /**
      * A dummy authentication store containing known user names and passwords.
-     * TODO: remove after connecting to a real authentication system.
      */
-    private static final String[] DUMMY_CREDENTIALS = new String[]{
-            "erik@eppenhof.nl:applab"
-    };
+    //private static final String[] DUMMY_CREDENTIALS = new String[]{
+    //        "erik@eppenhof.nl:applab"
+    //};
     /**
      * Keep track of the login task to ensure we can cancel it if requested.
      */
@@ -57,12 +56,15 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
     private String email;
 
     private String access_token = null;
-    private ServerConnector server = MainApp.server;;
+    private ServerConnector server = MainApp.server;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+
+        // Connection to server
+        server = MainApp.server;
 
         // Set up the login form.
         mEmailView = (AutoCompleteTextView) findViewById(R.id.email);
@@ -273,7 +275,6 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
 
         @Override
         protected Boolean doInBackground(Void... params) {
-            // TODO: attempt authentication against a network service.
 
             try {
                 // Simulate network access.
@@ -281,17 +282,16 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
             } catch (InterruptedException e) {
                 return false;
             }
-            // TODO: change dummy_credentials to data from database
-            for (String credential : DUMMY_CREDENTIALS) {
-                String[] pieces = credential.split(":");
-                if (pieces[0].equals(mEmail)) {
-                    // Account exists, return true if the password matches.
-                    return pieces[1].equals(mPassword);
-                }
-            }
+
+            if (server.userRegistered(mEmail) && server.getPassword(mEmail)==mPassword)
+                return true;
+            else if (server.userRegistered(mEmail) && server.getPassword(mEmail)!=mPassword)
+                return false;
+            else
+                server.newUser(mEmail, server.getAccessToken(mEmail), mPassword, server.isControlGroup(mEmail));
 
             if (server.getAccessToken(mEmail) == null) {
-                server.newUser(mEmail, access_token, mPassword);
+                server.newUser(mEmail, access_token, mPassword, server.isControlGroup(mEmail));
             }
 
             return false;
