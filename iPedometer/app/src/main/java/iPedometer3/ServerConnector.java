@@ -154,15 +154,33 @@ public class ServerConnector implements ServerInterface {
     }
 
     @Override
-    public LinkedList<PersuasivePart> getAllMessages() {
-        ArrayList<String> content = sendRequestToServer("SELECT message FROM messages", "String", "query");
-        ArrayList<String> types = sendRequestToServer("SELECT type FROM messages", "String", "query");
-        LinkedList<PersuasivePart> messages = new LinkedList<PersuasivePart>();
+    public LinkedList<PersuasivePart> [] getAllMessages() {
+        ArrayList<String> content = sendRequestToServer("SELECT message FROM messages;", "String", "query");
+        ArrayList<String> types = sendRequestToServer("SELECT type FROM messages;", "String", "query");
+        LinkedList<PersuasivePart> authority = new LinkedList<PersuasivePart>();
+        LinkedList<PersuasivePart> commitment = new LinkedList<PersuasivePart>();
+        LinkedList<PersuasivePart> consensus = new LinkedList<PersuasivePart>();
+        LinkedList<PersuasivePart> funny = new LinkedList<PersuasivePart>();
+        LinkedList<PersuasivePart> scarcity = new LinkedList<PersuasivePart>();
         for(int i = 0; i < content.size(); i++){
             PersuasionType type = PersuasionType.valueOf(types.get(i).toUpperCase());
-            messages.add(new PersuasivePart(content.get(i), type));
+            switch(type){
+                case AUTHORITY: authority.add(new PersuasivePart(content.get(i), type));
+                    break;
+                case COMMITMENT: commitment.add(new PersuasivePart(content.get(i), type));
+                    break;
+                case CONSENSUS: consensus.add(new PersuasivePart(content.get(i), type));
+                    break;
+                case FUNNY: funny.add(new PersuasivePart(content.get(i), type));
+                    break;
+                case SCARCITY: scarcity.add(new PersuasivePart(content.get(i), type));
+                    break;
+                default:
+                    break;
+            }
         }
-        return messages;
+        LinkedList<PersuasivePart> [] allMessages = (LinkedList<PersuasivePart>[]) new LinkedList<?> [5];
+        return allMessages;
     }
 
     @Override // Werkt
