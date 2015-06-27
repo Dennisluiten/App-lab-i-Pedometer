@@ -45,7 +45,7 @@ public class TimedMessagesGenerator extends AbstractTimedMessageGenerator {
 
         }
 
-        // Genereer één "funny"-bericht per dag.
+        // Genereer Ã©Ã©n "funny"-bericht per dag.
         funnyMessage(messages);
 
         return messages;
