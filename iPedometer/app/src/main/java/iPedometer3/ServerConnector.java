@@ -22,7 +22,6 @@ public class ServerConnector implements ServerInterface {
 
     private String urlstring = "http://applab.ai.ru.nl:8080/teamD/ServletTest2";
     private URLConnection conn;
-    protected ArrayList<String> serverResponse;
     private ArrayList<String> responseStrings;
 
 
@@ -71,6 +70,8 @@ public class ServerConnector implements ServerInterface {
         ArrayList<String> responses = sendRequestToServer(sql, "int", "query");
         if(responses.size()>1)
             System.out.println("Multiple return values received while expecting 1.");
+        if(responses.isEmpty())
+            return -1;
         if(responses.get(0).startsWith("FAIL"))
             return -1;
         return Integer.parseInt(responses.get(0));
@@ -85,18 +86,42 @@ public class ServerConnector implements ServerInterface {
         return responses.get(0);
     }
 
-    private ArrayList<String> sendRequestToServer(String sql, String returnType, String action){
+    private ArrayList<String> sendRequestToServer2(String sql, String returnType, String action){
         responseStrings = null;
-        new Requester().execute(sql, returnType, action);
+        System.out.println("Starting new Thread with " + sql);
+        new Requester2().execute(sql, returnType, action);
         while(responseStrings == null){
             try {
-                System.out.println("Putting thread to sleep  for 400s");
+                System.out.println("Denniiiiis!! Putting thread to sleep  for 400s");
                 Thread.sleep(400);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
         }
         return responseStrings;
+    }
+
+    private ArrayList<String> sendRequestToServer(String sql, String returnType, String action){
+        ArrayList<String> responses = new ArrayList<String>();
+        try {
+            BufferedReader serverResponse = actuallySendRequest(String.format("dbAction=%s&returnType=%s&args=%s", action, returnType, sql));
+            String nextResponse;
+            while ((nextResponse = serverResponse.readLine()) != null) {
+                if (nextResponse.startsWith("return:"))
+                    responses.add(nextResponse.substring(7));
+                System.out.println(nextResponse);
+            }
+            serverResponse.close();
+
+        }catch (UnknownHostException e){
+            responses = new ArrayList<String>();
+            responses.add("FAIL due to UnknownHostException. Likely due to no internet connection.");
+            System.out.println(responses.get(0));
+        }   catch (IOException e) {
+            e.printStackTrace();
+        }
+        return responses;
+
     }
 
     @Override//Werkt
@@ -106,6 +131,7 @@ public class ServerConnector implements ServerInterface {
 
     @Override//Werkt
     public String getPassword(String userEmail) {
+        System.out.println("Entering getPassword");
         return queryString(String.format("SELECT password FROM users WHERE email = '%s' LIMIT 1;", userEmail));
     }
 
@@ -138,6 +164,7 @@ public class ServerConnector implements ServerInterface {
 
     @Override // Werkt
     public boolean newUser(String userEmail, String accesstoken, String password, boolean controlGroup) {
+        System.out.println("Entering New User.");
         int inControlGroup = 0;
         if(controlGroup)
             inControlGroup = 1;
@@ -220,7 +247,7 @@ public class ServerConnector implements ServerInterface {
         return insert(String.format("UPDATE users SET studyStartTime = '%s' WHERE email = '%s';", startTime, userEmail));
     }
 
-    private class Requester extends AsyncTask<String, Void, ArrayList<String>>{
+    private class Requester2 extends AsyncTask<String, Void, ArrayList<String>>{
 
         @Override
         protected ArrayList<String> doInBackground(String... params) {
