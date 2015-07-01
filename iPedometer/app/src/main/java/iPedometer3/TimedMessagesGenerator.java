@@ -115,7 +115,7 @@ public class TimedMessagesGenerator extends AbstractTimedMessageGenerator {
      * @param mb
      * @param messages
      */
-    private void walkCycleMessage(MovesBlock mb, LinkedList<TimedMessage> messages)
+    public void walkCycleMessage(MovesBlock mb, LinkedList<TimedMessage> messages)
     {
         // fietsbare afstand?
         if(mb.getType() == MovesBlockType.TRANSPORT
