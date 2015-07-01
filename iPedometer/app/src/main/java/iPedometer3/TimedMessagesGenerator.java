@@ -34,7 +34,6 @@ public class TimedMessagesGenerator extends AbstractTimedMessageGenerator {
 
         for(MovesBlock mb : movesBlocks)
         {
-            // TODO: "funny" berichten genereren!!!
             // Check wanneer er berichten verstuurd kunnen worden
             // en voeg deze toe aan de te versturen berichten.
             betweenEventsMessage(mb, messages, calendarEvents);

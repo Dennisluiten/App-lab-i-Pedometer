@@ -28,20 +28,30 @@ public class RandomTimedMessagesGenerator extends AbstractTimedMessageGenerator 
             Random r = new Random();
             int time_offset_minutes = r.nextInt(30);
             boolean plus = r.nextBoolean();
+
+            PersuasiveMessage per_message = msg_gen.generateMessage(getRandomActivity());
+
             if(plus) {
-                PersuasiveMessage per_message = msg_gen.generateMessage(getRandomActivity());
+
                 TimedMessage message = new TimedMessage(
                         hour * HOUR_IN_MILLI + time_offset_minutes * MIN_IN_MILLI,
                         per_message);
                 messages.add(message);
             }
+            else {
+                TimedMessage message = new TimedMessage(
+                        hour * HOUR_IN_MILLI - time_offset_minutes * MIN_IN_MILLI,
+                        per_message);
+                messages.add(message);
+            }
+
         }
         return messages;
     }
 
     private String getRandomActivity() {
         Random r = new Random();
-        int i = r.nextInt(7);
+        int i = r.nextInt(6);
 
         switch(i){
             case 0: return "Heb je wat tijd tussen afspraken? Maak eens een wandeling.";
