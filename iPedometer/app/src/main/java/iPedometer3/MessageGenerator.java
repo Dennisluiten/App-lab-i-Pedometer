@@ -1,5 +1,7 @@
 package iPedometer3;
 
+import android.os.AsyncTask;
+
 import com.example.erikeppenhof.myapplication.MainApp;
 
 import java.util.LinkedList;
@@ -56,9 +58,10 @@ public class MessageGenerator {
                 new PersuasivePart("Drink veel water waardoor je vaak naar het toilet moet; het liefst op een andere verdieping.",
                         PersuasionType.FUNNY));
         */
-
-        LinkedList<PersuasivePart>[] all_messages = server.getAllMessages();
-
+        // Load messages from the server, in the background using an asynctask.
+        MessageLoader msg_loader = new MessageLoader();
+        LinkedList<PersuasivePart>[] all_messages = msg_loader.doInBackground();
+        // Split the messages in their respective persuasion strategies.
         for(PersuasivePart part : all_messages[0])
             authorityMessages.add(part);
         for(PersuasivePart part : all_messages[1])
@@ -72,6 +75,14 @@ public class MessageGenerator {
 
     }
 
+    /**
+     * Generates a random persuasive message consisting of a given activity part
+     * and a random persuasive part.
+     * The strategy of the persuasive part is chosen based on the user's susceptibility for
+     * certain strategies.
+     * @param activityPart The activity part of the message, e.g. "Take the stairs."
+     * @return An persuasive message, consisting of the activity part followed by a persuasive part.
+     */
     public PersuasiveMessage generateMessage(String activityPart)
     {
         Random random = new Random();
@@ -107,5 +118,17 @@ public class MessageGenerator {
         int randomIndex = random.nextInt(funnyMessages.size());
         PersuasivePart msg = funnyMessages.get(randomIndex);
         return new PersuasiveMessage(msg, "");
+    }
+
+    /**
+     * For loading the messages from the server.
+     */
+    private class MessageLoader extends AsyncTask<String, String, LinkedList<PersuasivePart>[]> {
+
+        @Override
+        protected LinkedList<PersuasivePart>[] doInBackground(String... params) {
+            LinkedList<PersuasivePart>[] all_messages = server.getAllMessages();
+            return all_messages;
+        }
     }
 }
