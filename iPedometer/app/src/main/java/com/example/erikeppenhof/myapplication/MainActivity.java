@@ -4,6 +4,7 @@ import android.app.AlarmManager;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.NotificationCompat;
 import android.support.v7.app.ActionBarActivity;
@@ -48,6 +49,8 @@ public class MainActivity extends ActionBarActivity {
     private MovesLoader movesLoader;
 
     private ServerConnector server;
+    private String email;
+    private double[] userWeights;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,8 +61,11 @@ public class MainActivity extends ActionBarActivity {
 
         Log.d("MainActivity", "MainActivity Started");
 
-        access_token = server.getAccessToken(this.getIntent().getStringExtra("email"));
-        String email = this.getIntent().getStringExtra("email");
+        email = this.getIntent().getStringExtra("email");
+
+        ServerTask serverTask = new ServerTask();
+        serverTask.execute();
+        //server.getAccessToken(this.getIntent().getStringExtra("email"));
 
         // Load the susceptibility scores of the user
         // (how well they score on 'Authority', 'Commitment' etc. on the survey).
@@ -193,7 +199,8 @@ public class MainActivity extends ActionBarActivity {
 
     private RandomCollection<PersuasionType> getUserSusceptibilityScores(String email)
     {
-        double[] userWeights = server.getEnqueteWeights(email);
+        ServerTask serverTask = new ServerTask();
+        serverTask.execute();
         RandomCollection<PersuasionType> userScores = new RandomCollection<PersuasionType>();
         // Worden de scores teruggegeven op alfabetische volgorde?
         userScores.add(userWeights[0], PersuasionType.AUTHORITY);
@@ -326,5 +333,32 @@ public class MainActivity extends ActionBarActivity {
                 (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         mNotifyMgr.notify(mNotificationID, mBuilder.build());
     }
-}
 
+    public class ServerTask extends AsyncTask<Void, Void, Boolean>{
+        public ServerTask() {
+
+        }
+
+        @Override
+        protected Boolean doInBackground(Void... params) {
+            access_token = server.getAccessToken(email);
+            userWeights = server.getEnqueteWeights(email);
+            if (access_token==null || userWeights==null) {
+                return false;
+            }
+            return true;
+        }
+
+        @Override
+        protected void onPostExecute(Boolean object) {
+
+        }
+
+        @Override
+        protected void onCancelled() {
+
+        }
+
+    }
+
+}
