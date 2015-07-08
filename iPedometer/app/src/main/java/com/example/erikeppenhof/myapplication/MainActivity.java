@@ -4,6 +4,7 @@ import android.app.AlarmManager;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.NotificationCompat;
 import android.support.v7.app.ActionBarActivity;
@@ -23,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Calendar;
 import java.util.LinkedList;
+import java.util.concurrent.ExecutionException;
 
 import iPedometer3.AbstractTimedMessageGenerator;
 import iPedometer3.CalendarEvent;
@@ -42,7 +44,6 @@ public class MainActivity extends ActionBarActivity {
 
     public final static int CHECK_PER_N_MINUTES = 5;
     private boolean sendingStopped;
-    public static String str = "test";
 
     private String access_token;
     private MovesLoader movesLoader;
@@ -77,6 +78,19 @@ public class MainActivity extends ActionBarActivity {
         int startDay = 24;
         Calendar cal = Calendar.getInstance();
 
+        // Load whether the user is in the control group or not.
+        boolean inControlGroup = false;
+        LoadControlGroupFromServer ldc = new LoadControlGroupFromServer();
+        try {
+            inControlGroup = ldc.execute(email).get();
+        }
+        catch (InterruptedException ie){
+            ie.printStackTrace();
+        }
+        catch (ExecutionException ee) {
+            ee.printStackTrace();
+        }
+
         if(cal.get(Calendar.DAY_OF_YEAR) <= (cal.get(Calendar.DAY_OF_YEAR) + 7))
         {
             // Eerste week -> willekeurige berichten
@@ -86,7 +100,7 @@ public class MainActivity extends ActionBarActivity {
         else
         {
             // Tweede week
-            if(inControlGroup(email)) {
+            if(inControlGroup) {
                 // Gebruiker zit in controlegroep, ga door met willekeurige berichten sturen.
                 AbstractTimedMessageGenerator generator = new TimedMessagesGenerator(userScores);
                 timedMessages = generator.generateTimedMessages(storyLine, calendarEvents);
@@ -186,22 +200,40 @@ public class MainActivity extends ActionBarActivity {
         textView.setText(stappen);
     }
 
-    private boolean inControlGroup(String email)
+    private class LoadControlGroupFromServer extends AsyncTask<String, String, Boolean>
     {
-        return server.isControlGroup(email);
+        @Override
+        protected Boolean doInBackground(String... strings) {
+            return server.isControlGroup(strings[0]);
+        }
     }
 
     private RandomCollection<PersuasionType> getUserSusceptibilityScores(String email)
     {
-        double[] userWeights = server.getEnqueteWeights(email);
         RandomCollection<PersuasionType> userScores = new RandomCollection<PersuasionType>();
-        // Worden de scores teruggegeven op alfabetische volgorde?
-        userScores.add(userWeights[0], PersuasionType.AUTHORITY);
-        userScores.add(userWeights[1], PersuasionType.COMMITMENT);
-        userScores.add(userWeights[2], PersuasionType.CONSENSUS);
-        userScores.add(userWeights[3], PersuasionType.SCARCITY);
-
+        LoadScoresFromServer ld = new LoadScoresFromServer();
+        try {
+            double[] userWeights = ld.execute(email).get();
+            userScores.add(userWeights[0], PersuasionType.AUTHORITY);
+            userScores.add(userWeights[1], PersuasionType.COMMITMENT);
+            userScores.add(userWeights[2], PersuasionType.CONSENSUS);
+            userScores.add(userWeights[3], PersuasionType.SCARCITY);
+        }
+        catch(InterruptedException e) {
+            e.printStackTrace();
+        }
+        catch(ExecutionException e) {
+            e.printStackTrace();
+        }
         return userScores;
+    }
+
+    private class LoadScoresFromServer extends AsyncTask<String, String, double[]>
+    {
+        @Override
+        protected double[] doInBackground(String... strings) {
+            return server.getEnqueteWeights(strings[0]);
+        }
     }
 
     private LinkedList<MovesBlock> loadMovesData(MovesLoader movesLoader)
@@ -222,16 +254,16 @@ public class MainActivity extends ActionBarActivity {
         CalendarLoader calendarLoader = new CalendarLoader(this);
         Calendar cal = Calendar.getInstance();
 
-        cal.set(cal.HOUR, 0);
-        cal.set(cal.MINUTE, 0);
-        cal.set(cal.SECOND, 0);
-        cal.set(cal.MILLISECOND, 0);
+        cal.set(Calendar.HOUR, 0);
+        cal.set(Calendar.MINUTE, 0);
+        cal.set(Calendar.SECOND, 0);
+        cal.set(Calendar.MILLISECOND, 0);
 
         Date startTime = new Date(cal.getTimeInMillis());
 
-        cal.set(cal.HOUR, 23);
-        cal.set(cal.MINUTE, 59);
-        cal.set(cal.SECOND, 59);
+        cal.set(Calendar.HOUR, 23);
+        cal.set(Calendar.MINUTE, 59);
+        cal.set(Calendar.SECOND, 59);
 
         Date endTime = new Date(cal.getTimeInMillis());
 

@@ -6,6 +6,7 @@ import com.example.erikeppenhof.myapplication.MainApp;
 
 import java.util.LinkedList;
 import java.util.Random;
+import java.util.concurrent.ExecutionException;
 
 /**
  * Generates messages based on a user's susceptibility
@@ -41,38 +42,31 @@ public class MessageGenerator {
 
     private void loadMessages()
     {
-        /*
-        consensusMessages.add(
-                new PersuasivePart("Minder dan 10% van de mensen is inactief.",
-                        PersuasionType.CONSENSUS));
-        authorityMessages.add(
-                new PersuasivePart("Volgens Thuisarts.nl maakt bewegen je spieren en botten sterker.",
-                        PersuasionType.AUTHORITY));
-        scarcityMessages.add(
-                new PersuasivePart("Per dag is er maar één kans om meer te bewegen. Neem die kans vandaag!",
-                        PersuasionType.SCARCITY));
-        commitmentMessages.add(
-                new PersuasivePart("Probeer je aan je doel te houden om gezonder te leven door meer te bewegen. Zet nog een tandje bij!",
-                        PersuasionType.COMMITMENT));
-        funnyMessages.add(
-                new PersuasivePart("Drink veel water waardoor je vaak naar het toilet moet; het liefst op een andere verdieping.",
-                        PersuasionType.FUNNY));
-        */
-        // Load messages from the server, in the background using an asynctask.
-        MessageLoader msg_loader = new MessageLoader();
-        LinkedList<PersuasivePart>[] all_messages = msg_loader.doInBackground();
-        // Split the messages in their respective persuasion strategies.
-        for(PersuasivePart part : all_messages[0])
-            authorityMessages.add(part);
-        for(PersuasivePart part : all_messages[1])
-            commitmentMessages.add(part);
-        for(PersuasivePart part : all_messages[2])
-            consensusMessages.add(part);
-        for(PersuasivePart part : all_messages[3])
-            funnyMessages.add(part);
-        for(PersuasivePart part : all_messages[4])
-            scarcityMessages.add(part);
 
+        MessageLoader msg_loader = new MessageLoader();
+
+        try {
+            // Load messages from the server, using an asynctask,
+            // but waits before the messages are loaded before continuing the program.
+            LinkedList<PersuasivePart>[] all_messages = msg_loader.execute().get();
+            // Split the messages in their respective persuasion strategies.
+            for(PersuasivePart part : all_messages[0])
+                authorityMessages.add(part);
+            for(PersuasivePart part : all_messages[1])
+                commitmentMessages.add(part);
+            for(PersuasivePart part : all_messages[2])
+                consensusMessages.add(part);
+            for(PersuasivePart part : all_messages[3])
+                funnyMessages.add(part);
+            for(PersuasivePart part : all_messages[4])
+                scarcityMessages.add(part);
+        }
+        catch(InterruptedException e) {
+            e.printStackTrace();
+        }
+        catch(ExecutionException e) {
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -127,8 +121,7 @@ public class MessageGenerator {
 
         @Override
         protected LinkedList<PersuasivePart>[] doInBackground(String... params) {
-            LinkedList<PersuasivePart>[] all_messages = server.getAllMessages();
-            return all_messages;
+            return server.getAllMessages();
         }
     }
 }
