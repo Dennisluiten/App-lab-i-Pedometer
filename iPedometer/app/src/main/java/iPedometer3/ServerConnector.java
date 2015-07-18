@@ -247,6 +247,11 @@ public class ServerConnector implements ServerInterface {
         return insert(String.format("UPDATE users SET studyStartTime = '%s' WHERE email = '%s';", startTime, userEmail));
     }
 
+    @Override
+    public boolean setNewAccessToken(String userEmail, String accesstoken) {
+        return insert(String.format("UPDATE users SET accesstoken = '%s' WHERE email = '%s';", accesstoken, userEmail));
+    }
+
     private class Requester2 extends AsyncTask<String, Void, ArrayList<String>>{
 
         @Override
