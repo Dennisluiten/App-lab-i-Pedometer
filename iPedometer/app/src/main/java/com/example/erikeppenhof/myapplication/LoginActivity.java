@@ -283,9 +283,9 @@ public class LoginActivity extends Activity implements LoaderCallbacks<Cursor> {
                 return false;
             }
 
-            if (server.userRegistered(mEmail) && server.getPassword(mEmail)==mPassword)
+            if (server.userRegistered(mEmail) && server.getPassword(mEmail).equals(mPassword))
                 return true;
-            else if (server.userRegistered(mEmail) && server.getPassword(mEmail)!=mPassword)
+            else if (server.userRegistered(mEmail) && !server.getPassword(mEmail).equals(mPassword))
                 return false;
             else
                 server.newUser(mEmail, server.getAccessToken(mEmail), mPassword, server.isControlGroup(mEmail));
