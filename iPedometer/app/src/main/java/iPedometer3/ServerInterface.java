@@ -21,10 +21,6 @@ public interface ServerInterface {
     public boolean newUser(String userEmail, String accesstoken, String password, boolean controlGroup);
     public boolean setEnqueteWeights(String userEmail, double [] weights);
     public boolean setStudyStartTime(String userEmail, Timestamp startTime);
+    public boolean setNewAccessToken(String userEmail, String accesstoken);
 
 }
-
-
-
-
-

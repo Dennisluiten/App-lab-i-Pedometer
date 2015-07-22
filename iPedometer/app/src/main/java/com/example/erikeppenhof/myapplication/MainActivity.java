@@ -51,6 +51,9 @@ public class MainActivity extends ActionBarActivity {
     private ServerConnector server;
     private String email;
     private double[] userWeights;
+    private AbstractTimedMessageGenerator generator;
+    private RandomCollection<PersuasionType> userScores;
+    private boolean random;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,19 +66,8 @@ public class MainActivity extends ActionBarActivity {
 
         email = this.getIntent().getStringExtra("email");
 
-        ServerTask serverTask = new ServerTask();
-        serverTask.execute();
-        //server.getAccessToken(this.getIntent().getStringExtra("email"));
-
-        // Load the susceptibility scores of the user
-        // (how well they score on 'Authority', 'Commitment' etc. on the survey).
-        // Used to choose a persuasion strategy weighted for the user's score.
-        RandomCollection<PersuasionType> userScores = getUserSusceptibilityScores(email);
         // Load the events from the calendar
         LinkedList<CalendarEvent> calendarEvents = loadCalendarData();
-
-        movesLoader = new MovesLoader(access_token);
-        LinkedList<MovesBlock> storyLine = loadMovesData(movesLoader);
 
         LinkedList<TimedMessage> timedMessages;
 
@@ -83,10 +75,52 @@ public class MainActivity extends ActionBarActivity {
         int startDay = 24;
         Calendar cal = Calendar.getInstance();
 
+
+        // Random of Timed
+
         if(cal.get(Calendar.DAY_OF_YEAR) <= (cal.get(Calendar.DAY_OF_YEAR) + 7))
         {
             // Eerste week -> willekeurige berichten
-            AbstractTimedMessageGenerator generator = new RandomTimedMessagesGenerator(userScores);
+            random = true;
+        }
+        else
+        {
+            // Tweede week
+            if(inControlGroup(email)) {
+                // Gebruiker zit in controlegroep, ga door met willekeurige berichten sturen.
+                random = true;
+            }
+            else {
+                // Gebruiker zit in 'echte' groep, stuur getimede berichten.
+                random = false;
+            }
+        }
+
+        ServerTask serverTask = new ServerTask();
+        serverTask.execute();
+        //server.getAccessToken(this.getIntent().getStringExtra("email"));
+
+        // Load the susceptibility scores of the user
+        // (how well they score on 'Authority', 'Commitment' etc. on the survey).
+        // Used to choose a persuasion strategy weighted for the user's score.
+        while(userWeights == null) {
+
+        }
+        // Load the events from the calendar
+        //LinkedList<CalendarEvent> calendarEvents = loadCalendarData();
+
+        movesLoader = new MovesLoader(access_token);
+        LinkedList<MovesBlock> storyLine = loadMovesData(movesLoader);
+
+        //LinkedList<TimedMessage> timedMessages;
+
+        // TODO: bepalen wanneer de gebruiker is begonnen met de studie?
+        //int startDay = 24;
+        //Calendar cal = Calendar.getInstance();
+
+        if(cal.get(Calendar.DAY_OF_YEAR) <= (cal.get(Calendar.DAY_OF_YEAR) + 7))
+        {
+            // Eerste week -> willekeurige berichten
             timedMessages = generator.generateTimedMessages(storyLine, calendarEvents);
         }
         else
@@ -94,12 +128,10 @@ public class MainActivity extends ActionBarActivity {
             // Tweede week
             if(inControlGroup(email)) {
                 // Gebruiker zit in controlegroep, ga door met willekeurige berichten sturen.
-                AbstractTimedMessageGenerator generator = new TimedMessagesGenerator(userScores);
                 timedMessages = generator.generateTimedMessages(storyLine, calendarEvents);
             }
             else {
                 // Gebruiker zit in 'echte' groep, stuur getimede berichten.
-                AbstractTimedMessageGenerator generator = new RandomTimedMessagesGenerator(userScores);
                 timedMessages = generator.generateTimedMessages(storyLine, calendarEvents);
             }
         }
@@ -343,7 +375,15 @@ public class MainActivity extends ActionBarActivity {
         protected Boolean doInBackground(Void... params) {
             access_token = server.getAccessToken(email);
             userWeights = server.getEnqueteWeights(email);
-            if (access_token==null || userWeights==null) {
+            userScores = getUserSusceptibilityScores(email);
+            if (random) {
+                generator = new RandomTimedMessagesGenerator(userScores);
+            }
+            else {
+                generator = new TimedMessagesGenerator(userScores);
+            }
+
+            if (access_token==null || userWeights==null || userScores==null || generator==null) {
                 return false;
             }
             return true;
