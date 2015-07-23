@@ -75,27 +75,6 @@ public class MainActivity extends ActionBarActivity {
         int startDay = 24;
         Calendar cal = Calendar.getInstance();
 
-
-        // Random of Timed
-
-        if(cal.get(Calendar.DAY_OF_YEAR) <= (cal.get(Calendar.DAY_OF_YEAR) + 7))
-        {
-            // Eerste week -> willekeurige berichten
-            random = true;
-        }
-        else
-        {
-            // Tweede week
-            if(inControlGroup(email)) {
-                // Gebruiker zit in controlegroep, ga door met willekeurige berichten sturen.
-                random = true;
-            }
-            else {
-                // Gebruiker zit in 'echte' groep, stuur getimede berichten.
-                random = false;
-            }
-        }
-
         ServerTask serverTask = new ServerTask();
         serverTask.execute();
         //server.getAccessToken(this.getIntent().getStringExtra("email"));
@@ -126,7 +105,7 @@ public class MainActivity extends ActionBarActivity {
         else
         {
             // Tweede week
-            if(inControlGroup(email)) {
+            if(!random) {
                 // Gebruiker zit in controlegroep, ga door met willekeurige berichten sturen.
                 timedMessages = generator.generateTimedMessages(storyLine, calendarEvents);
             }
@@ -222,25 +201,6 @@ public class MainActivity extends ActionBarActivity {
         String st = getResources().getString(R.string.stappen);
         String stappen = String.format(st, steps);
         textView.setText(stappen);
-    }
-
-    private boolean inControlGroup(String email)
-    {
-        return server.isControlGroup(email);
-    }
-
-    private RandomCollection<PersuasionType> getUserSusceptibilityScores(String email)
-    {
-        ServerTask serverTask = new ServerTask();
-        serverTask.execute();
-        RandomCollection<PersuasionType> userScores = new RandomCollection<PersuasionType>();
-        // Worden de scores teruggegeven op alfabetische volgorde?
-        userScores.add(userWeights[0], PersuasionType.AUTHORITY);
-        userScores.add(userWeights[1], PersuasionType.COMMITMENT);
-        userScores.add(userWeights[2], PersuasionType.CONSENSUS);
-        userScores.add(userWeights[3], PersuasionType.SCARCITY);
-
-        return userScores;
     }
 
     private LinkedList<MovesBlock> loadMovesData(MovesLoader movesLoader)
@@ -367,20 +327,31 @@ public class MainActivity extends ActionBarActivity {
     }
 
     public class ServerTask extends AsyncTask<Void, Void, Boolean>{
-        public ServerTask() {
 
+        private String tmp_access_token;
+        private double[] tmp_userWeights;
+        private RandomCollection<PersuasionType> tmp_userScores;
+        private AbstractTimedMessageGenerator tmp_generator;
+
+        public ServerTask() {
+            tmp_userScores = new RandomCollection<>();
         }
 
         @Override
         protected Boolean doInBackground(Void... params) {
-            access_token = server.getAccessToken(email);
-            userWeights = server.getEnqueteWeights(email);
-            userScores = getUserSusceptibilityScores(email);
+            tmp_access_token = server.getAccessToken(email);
+            tmp_userWeights = server.getEnqueteWeights(email);
+
+            tmp_userScores.add(tmp_userWeights[0], PersuasionType.AUTHORITY);
+            tmp_userScores.add(tmp_userWeights[1], PersuasionType.COMMITMENT);
+            tmp_userScores.add(tmp_userWeights[2], PersuasionType.CONSENSUS);
+            tmp_userScores.add(tmp_userWeights[3], PersuasionType.SCARCITY);
+
             if (random) {
-                generator = new RandomTimedMessagesGenerator(userScores);
+                tmp_generator = new RandomTimedMessagesGenerator(userScores);
             }
             else {
-                generator = new TimedMessagesGenerator(userScores);
+                tmp_generator = new TimedMessagesGenerator(userScores);
             }
 
             if (access_token==null || userWeights==null || userScores==null || generator==null) {
@@ -391,7 +362,10 @@ public class MainActivity extends ActionBarActivity {
 
         @Override
         protected void onPostExecute(Boolean object) {
-
+            access_token = tmp_access_token;
+            userWeights = tmp_userWeights;
+            userScores = tmp_userScores;
+            generator = tmp_generator;
         }
 
         @Override
