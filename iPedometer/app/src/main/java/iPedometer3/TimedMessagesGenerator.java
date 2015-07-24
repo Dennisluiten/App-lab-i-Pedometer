@@ -40,9 +40,9 @@ public class TimedMessagesGenerator extends AbstractTimedMessageGenerator {
             walkCycleMessage(mb, messages);
             transportMessage(mb, messages);
             stairsMessage(mb, messages);
-            standMessage(messages, calendarEvents);
-
         }
+
+        standMessage(messages, calendarEvents);
 
         // Genereer één "funny"-bericht per dag.
         funnyMessage(messages);
@@ -80,6 +80,7 @@ public class TimedMessagesGenerator extends AbstractTimedMessageGenerator {
                                     ce_1.getEndTime() + MSG_TIME_OFFSET,
                                     p_msg);
                             messages.add(msg);
+                            System.out.println("Bericht gegenereerd: "+msg);
                         }
                         else if(dur >= DESK_EXERCISE_TIME) {
                             PersuasiveMessage p_msg = msg_gen.generateMessage(
@@ -88,6 +89,7 @@ public class TimedMessagesGenerator extends AbstractTimedMessageGenerator {
                                     ce_1.getEndTime() + MSG_TIME_OFFSET,
                                     p_msg);
                             messages.add(msg);
+                            System.out.println("Bericht gegenereerd: " + msg);
                         }
                     }
                 }
@@ -98,15 +100,17 @@ public class TimedMessagesGenerator extends AbstractTimedMessageGenerator {
     private void standMessage(LinkedList<TimedMessage> messages,
                               LinkedList<CalendarEvent> calendarEvents)
     {
-        for(CalendarEvent ce : calendarEvents)
-        {
-            PersuasiveMessage p_msg = msg_gen.generateMessage(
-                    "Ga eens staan tijdens een college/afspraak in plaats van te zitten.");
-            TimedMessage msg = new TimedMessage(
-                    ce.getStartTime() - MSG_TIME_OFFSET,
-                    p_msg);
-            messages.add(msg);
-        }
+        // Laat dit bericht voor één willekeurig event zien.
+        Random random = new Random();
+        CalendarEvent ce = calendarEvents.get(random.nextInt(calendarEvents.size()));
+
+        PersuasiveMessage p_msg = msg_gen.generateMessage(
+                "Ga eens staan tijdens een college/afspraak in plaats van te zitten.");
+        TimedMessage msg = new TimedMessage(
+                ce.getStartTime() - MSG_TIME_OFFSET,
+                p_msg);
+        messages.add(msg);
+        System.out.println("Bericht gegenereerd: " + msg);
     }
 
     /**
@@ -127,6 +131,7 @@ public class TimedMessagesGenerator extends AbstractTimedMessageGenerator {
                     mb.getStartTime() - MSG_TIME_OFFSET,
                     p_msg);
             messages.add(msg);
+            System.out.println("Bericht gegenereerd: " + msg);
         }
         // loopbare afstand?
         else if(mb.getType() == MovesBlockType.TRANSPORT || mb.getType() == MovesBlockType.CYCLING
@@ -138,6 +143,7 @@ public class TimedMessagesGenerator extends AbstractTimedMessageGenerator {
                     mb.getStartTime() - MSG_TIME_OFFSET,
                     p_msg);
             messages.add(msg);
+            System.out.println("Bericht gegenereerd: " + msg);
         }
     }
 
@@ -161,6 +167,7 @@ public class TimedMessagesGenerator extends AbstractTimedMessageGenerator {
                     mb.getStartTime() - MSG_TIME_OFFSET,
                     p_msg);
             messages.add(msg);
+            System.out.println("Bericht gegenereerd: " + msg);
         }
     }
 
@@ -181,6 +188,7 @@ public class TimedMessagesGenerator extends AbstractTimedMessageGenerator {
                     mb.getStartTime() - MSG_TIME_OFFSET,
                     p_msg);
             messages.add(msg);
+            System.out.println("Bericht gegenereerd: " + msg);
         }
     }
 
@@ -193,5 +201,6 @@ public class TimedMessagesGenerator extends AbstractTimedMessageGenerator {
 
         PersuasiveMessage p_msg = msg_gen.generateFunnyMessage();
         messages.add(new TimedMessage(message_time, p_msg));
+        System.out.println("Bericht gegenereerd: " + p_msg);
     }
 }

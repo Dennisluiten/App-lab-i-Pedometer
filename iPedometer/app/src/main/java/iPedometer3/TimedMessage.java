@@ -26,4 +26,8 @@ public class TimedMessage {
     public PersuasiveMessage getMessage() {
         return message;
     }
+
+    public String toString() {
+        return "[" + time + "] " + message;
+    }
 }

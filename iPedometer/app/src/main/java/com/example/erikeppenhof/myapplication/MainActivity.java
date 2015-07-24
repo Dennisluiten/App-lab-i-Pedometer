@@ -15,8 +15,6 @@ import android.widget.TextView;
 
 import org.json.JSONException;
 
-import java.lang.reflect.Array;
-import java.sql.Time;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -32,6 +30,8 @@ import iPedometer3.MessageAlarmReceiver;
 import iPedometer3.MovesBlock;
 import iPedometer3.MovesLoader;
 import iPedometer3.PersuasionType;
+import iPedometer3.PersuasiveMessage;
+import iPedometer3.PersuasivePart;
 import iPedometer3.RandomCollection;
 import iPedometer3.RandomTimedMessagesGenerator;
 import iPedometer3.ServerConnector;
@@ -69,29 +69,65 @@ public class MainActivity extends ActionBarActivity {
         // Load the events from the calendar
         LinkedList<CalendarEvent> calendarEvents = loadCalendarData();
 
-        LinkedList<TimedMessage> timedMessages;
+        LinkedList<TimedMessage> timedMessages = new LinkedList<>();
 
         // TODO: bepalen wanneer de gebruiker is begonnen met de studie?
         int startDay = 24;
         Calendar cal = Calendar.getInstance();
 
-        ServerTask serverTask = new ServerTask();
-        serverTask.execute();
+        System.out.println("Laad stuff van eigen server...");
+
+        //ServerTask serverTask = new ServerTask();
+        //serverTask.execute();
+
         //server.getAccessToken(this.getIntent().getStringExtra("email"));
 
-        // Load the susceptibility scores of the user
-        // (how well they score on 'Authority', 'Commitment' etc. on the survey).
-        // Used to choose a persuasion strategy weighted for the user's score.
-        while(userWeights == null) {
+        //while(userWeights == null) {
+            //System.out.println("Geen userWeights...");
+        //}
 
+        // Laad de user weights
+        LoadUserWeightsTask weightsTask = new LoadUserWeightsTask();
+        try {
+            userWeights = weightsTask.execute().get();
+            userScores = new RandomCollection<>();
+            for(double d : userWeights)
+                System.out.println("userWeight: "+d);
+
+            userScores.add(userWeights[0], PersuasionType.AUTHORITY);
+            userScores.add(userWeights[1], PersuasionType.COMMITMENT);
+            userScores.add(userWeights[2], PersuasionType.CONSENSUS);
+            userScores.add(userWeights[3], PersuasionType.FUNNY);
+            userScores.add(userWeights[4], PersuasionType.SCARCITY);
         }
-        // Load the events from the calendar
-        //LinkedList<CalendarEvent> calendarEvents = loadCalendarData();
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        // Laad de access token om data van de Moves app te kunnen halen.
+        LoadAccessTokenTask accessTokenTask = new LoadAccessTokenTask();
+        try {
+            access_token = accessTokenTask.execute().get();
+            System.out.println("Access token = " + access_token);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        // Laad de access token om data van de Moves app te kunnen halen.
+        LoadControlGroupTask controlGroupTask = new LoadControlGroupTask();
+        try {
+            random = controlGroupTask.execute().get();
+            System.out.println("in control group = "+random);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        System.out.println("Laad Moves data van Moves server...");
 
         movesLoader = new MovesLoader(access_token);
         LinkedList<MovesBlock> storyLine = loadMovesData(movesLoader);
-
-        //LinkedList<TimedMessage> timedMessages;
 
         // TODO: bepalen wanneer de gebruiker is begonnen met de studie?
         //int startDay = 24;
@@ -114,6 +150,18 @@ public class MainActivity extends ActionBarActivity {
                 timedMessages = generator.generateTimedMessages(storyLine, calendarEvents);
             }
         }
+
+        // Om berichten uit te testen.
+        /*
+        Calendar c = Calendar.getInstance();
+        long time_test_msg = c.getTimeInMillis() + 10000; // nu + 10 seconden.
+        PersuasivePart pp = new PersuasivePart("Iedereen weet dat iPedometer het beste is.", PersuasionType.AUTHORITY);
+        PersuasiveMessage p_msg = new PersuasiveMessage(pp, "Gebruik de app daarom nu!");
+
+        System.out.println("Test bericht: "+p_msg);
+
+        timedMessages.add(new TimedMessage(time_test_msg, p_msg));
+        */
 
         sendMessagesNew(timedMessages, email);
 
@@ -276,6 +324,8 @@ public class MainActivity extends ActionBarActivity {
             // Set the notification to be sent at the right time using the alarm manager.
             AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
             alarmManager.set(AlarmManager.RTC, m.getTime(), resultIntent);
+
+            System.out.println("Bericht klaargemaakt om te verzenden: "+m);
         }
     }
 
@@ -326,12 +376,46 @@ public class MainActivity extends ActionBarActivity {
         mNotifyMgr.notify(mNotificationID, mBuilder.build());
     }
 
+    private class LoadUserWeightsTask extends AsyncTask<Void, Void, double[]> {
+
+        public LoadUserWeightsTask() {
+
+        }
+
+        protected double[] doInBackground(Void... params) {
+            return server.getEnqueteWeights(email);
+        }
+    }
+
+    private class LoadAccessTokenTask extends AsyncTask<Void, Void, String> {
+
+        public LoadAccessTokenTask() {
+
+        }
+
+        protected String doInBackground(Void... params) {
+            return server.getAccessToken(email);
+        }
+    }
+
+    private class LoadControlGroupTask extends AsyncTask<Void, Void, Boolean> {
+
+        public LoadControlGroupTask() {
+
+        }
+
+        protected Boolean doInBackground(Void... params) {
+            return server.isControlGroup(email);
+        }
+    }
+
     public class ServerTask extends AsyncTask<Void, Void, Boolean>{
 
         private String tmp_access_token;
         private double[] tmp_userWeights;
         private RandomCollection<PersuasionType> tmp_userScores;
         private AbstractTimedMessageGenerator tmp_generator;
+        private Boolean tmp_random;
 
         public ServerTask() {
             tmp_userScores = new RandomCollection<>();
@@ -341,18 +425,12 @@ public class MainActivity extends ActionBarActivity {
         protected Boolean doInBackground(Void... params) {
             tmp_access_token = server.getAccessToken(email);
             tmp_userWeights = server.getEnqueteWeights(email);
+            tmp_random = server.isControlGroup(email);
 
             tmp_userScores.add(tmp_userWeights[0], PersuasionType.AUTHORITY);
             tmp_userScores.add(tmp_userWeights[1], PersuasionType.COMMITMENT);
             tmp_userScores.add(tmp_userWeights[2], PersuasionType.CONSENSUS);
             tmp_userScores.add(tmp_userWeights[3], PersuasionType.SCARCITY);
-
-            if (random) {
-                tmp_generator = new RandomTimedMessagesGenerator(userScores);
-            }
-            else {
-                tmp_generator = new TimedMessagesGenerator(userScores);
-            }
 
             if (access_token==null || userWeights==null || userScores==null || generator==null) {
                 return false;
@@ -365,7 +443,14 @@ public class MainActivity extends ActionBarActivity {
             access_token = tmp_access_token;
             userWeights = tmp_userWeights;
             userScores = tmp_userScores;
-            generator = tmp_generator;
+            random = tmp_random;
+
+            if (random) {
+                generator = new RandomTimedMessagesGenerator(userScores);
+            }
+            else {
+                generator = new TimedMessagesGenerator(userScores);
+            }
         }
 
         @Override
