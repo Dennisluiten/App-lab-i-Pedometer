@@ -37,6 +37,9 @@ public class MessageAlarmReceiver extends BroadcastReceiver {
 
         Intent resultIntent = new Intent(context, NotificationActivity.class);
 
+        resultIntent.putExtra("notification", message);
+        resultIntent.putExtra("email", email);
+
         PendingIntent resultPendingIntent =
                 PendingIntent.getActivity(
                         context,
@@ -44,9 +47,6 @@ public class MessageAlarmReceiver extends BroadcastReceiver {
                         resultIntent,
                         PendingIntent.FLAG_UPDATE_CURRENT
                 );
-
-        resultIntent.putExtra("notification", message);
-        resultIntent.putExtra("email", email);
 
         mBuilder.setContentIntent(resultPendingIntent);
         messageManager.notify(123, mBuilder.build());
