@@ -3,7 +3,9 @@ package com.example.erikeppenhof.myapplication;
 import android.app.AlarmManager;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.NotificationCompat;
@@ -132,7 +134,7 @@ public class MainActivity extends ActionBarActivity {
         // TODO: bepalen wanneer de gebruiker is begonnen met de studie?
         //int startDay = 24;
         //Calendar cal = Calendar.getInstance();
-
+        /*
         if(cal.get(Calendar.DAY_OF_YEAR) <= (cal.get(Calendar.DAY_OF_YEAR) + 7))
         {
             // Eerste week -> willekeurige berichten
@@ -150,9 +152,9 @@ public class MainActivity extends ActionBarActivity {
                 timedMessages = generator.generateTimedMessages(storyLine, calendarEvents);
             }
         }
-
+        */
         // Om berichten uit te testen.
-        /*
+
         Calendar c = Calendar.getInstance();
         long time_test_msg = c.getTimeInMillis() + 10000; // nu + 10 seconden.
         PersuasivePart pp = new PersuasivePart("Iedereen weet dat iPedometer het beste is.", PersuasionType.AUTHORITY);
@@ -161,10 +163,11 @@ public class MainActivity extends ActionBarActivity {
         System.out.println("Test bericht: "+p_msg);
 
         timedMessages.add(new TimedMessage(time_test_msg, p_msg));
-        */
 
-        sendMessagesNew(timedMessages, email);
 
+        sendMessagesNewest(timedMessages, email);
+
+        /*
         updateSteps();
 
         try {
@@ -185,6 +188,7 @@ public class MainActivity extends ActionBarActivity {
         }
         isToday = false;
         //CalendarIntegration ci = new CalendarIntegration(this);
+        */
     }
     private String[] dates = {"20150622", "20150623", "20150624", "20150625", "20150626", "20150627", "20150628", "20150629", "20150630", "20150701", "20150702", "20150703", "20150704", "20150705", "20150706", "20150707" ,"20150708", "20150709", "20150710"};
     private boolean isToday = false;
@@ -313,7 +317,7 @@ public class MainActivity extends ActionBarActivity {
 
         // source: http://karanbalkar.com/2013/07/tutorial-41-using-alarmmanager-and-broadcastreceiver-in-android/
         for(TimedMessage m : timedMessages) {
-            Intent messageIntent = new Intent(MainActivity.this, MessageAlarmReceiver.class);
+            Intent messageIntent = new Intent(this, MessageAlarmReceiver.class);
             // Put the message in the intent so the MessageAlarmReceiver can route it to
             // the MessageSendingService, which puts it in the notification.
             messageIntent.putExtra("MESSAGE", m.getMessage().toString());
@@ -326,6 +330,27 @@ public class MainActivity extends ActionBarActivity {
             alarmManager.set(AlarmManager.RTC, m.getTime(), resultIntent);
 
             System.out.println("Bericht klaargemaakt om te verzenden: "+m);
+        }
+    }
+
+    private void sendMessagesNewest(LinkedList<TimedMessage> timedMessages, String email) {
+        for(TimedMessage m : timedMessages) {
+            // Set the notification to be sent at the right time using the alarm manager.
+            AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
+
+            BroadcastReceiver messageAlarm = new MessageAlarmReceiver();
+            this.registerReceiver(messageAlarm, new IntentFilter("iPedometer.SEND_MESSAGE"));
+
+            Intent intent = new Intent(this, MessageAlarmReceiver.class);
+            // Put the message in the intent so the MessageAlarmReceiver can route it to
+            // the MessageSendingService, which puts it in the notification.
+            intent.putExtra("MESSAGE", m.getMessage().toString());
+            // For logging info when a button on the message dialog is pressed.
+            intent.putExtra("EMAIL", email);
+
+            PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, intent, 0);
+            alarmManager.set(AlarmManager.RTC, m.getTime(), pendingIntent);
+            System.out.println("Bericht klaargemaakt om te verzenden: " + m);
         }
     }
 

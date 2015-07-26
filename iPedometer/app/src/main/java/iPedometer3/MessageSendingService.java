@@ -28,6 +28,10 @@ public class MessageSendingService extends Service {
     private LinkedList<TimedMessage> timedMessages;
 
 
+    public void onCreate() {
+
+    }
+
     @Override
     public IBinder onBind(Intent intent) {
         return null;
@@ -38,6 +42,8 @@ public class MessageSendingService extends Service {
 
         String notification = intent.getStringExtra("MESSAGE");
         String email = intent.getStringExtra("EMAIL");
+
+        System.out.println("Notification! "+notification);
 
         Context app_con = this.getApplicationContext();
         messageManager = (NotificationManager) app_con.getSystemService(app_con.NOTIFICATION_SERVICE);

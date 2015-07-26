@@ -46,6 +46,11 @@
             android:name=".NotificationActivity"
             android:label="@string/title_activity_notification" >
         </activity>
+        <receiver android:name="iPedometer3.MessageAlarmReceiver" android:exported="true">
+            <intent-filter>
+                <action android:name="iPedometer.SEND_MESSAGE" />
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>

@@ -91,9 +91,11 @@ public class NotificationActivity extends ActionBarActivity {
         // 3) a java current time (now) instance
         final java.sql.Timestamp currentTimestamp = new java.sql.Timestamp(now.getTime());
 
+        //TODO: werkt niet, notification is altijd leeg.
         final String notification = this.getIntent().getStringExtra("notification");
         builder.setMessage(notification).setTitle(R.string.dialog_title);
 
+        // TODO: server methodes in AsyncActivities aanroepen.
         builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int id) {

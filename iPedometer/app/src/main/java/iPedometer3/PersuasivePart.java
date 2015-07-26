@@ -27,4 +27,6 @@ public class PersuasivePart {
     {
         return contents;
     }
+
+    public String toString() { return contents; }
 }
