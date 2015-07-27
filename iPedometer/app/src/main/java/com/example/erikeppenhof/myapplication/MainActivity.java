@@ -138,16 +138,19 @@ public class MainActivity extends ActionBarActivity {
         if(cal.get(Calendar.DAY_OF_YEAR) <= (cal.get(Calendar.DAY_OF_YEAR) + 7))
         {
             // Eerste week -> willekeurige berichten
+            generator = new RandomTimedMessagesGenerator(userScores);
             timedMessages = generator.generateTimedMessages(storyLine, calendarEvents);
         }
         else
         {
             // Tweede week
-            if(!random) {
+            if(random) {
                 // Gebruiker zit in controlegroep, ga door met willekeurige berichten sturen.
+                generator = new RandomTimedMessagesGenerator(userScores);
                 timedMessages = generator.generateTimedMessages(storyLine, calendarEvents);
             }
             else {
+                generator = new TimedMessagesGenerator(userScores);
                 // Gebruiker zit in 'echte' groep, stuur getimede berichten.
                 timedMessages = generator.generateTimedMessages(storyLine, calendarEvents);
             }
