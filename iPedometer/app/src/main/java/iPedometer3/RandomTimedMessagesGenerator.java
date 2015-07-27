@@ -1,5 +1,6 @@
 package iPedometer3;
 
+import java.util.Calendar;
 import java.util.LinkedList;
 import java.util.Random;
 
@@ -7,9 +8,6 @@ import java.util.Random;
  * Created by Hans-Christiaan on 11-6-2015.
  */
 public class RandomTimedMessagesGenerator extends AbstractTimedMessageGenerator {
-
-    private final static long HOUR_IN_MILLI = 3600000;
-    private final static long MIN_IN_MILLI = 60000;
 
     public RandomTimedMessagesGenerator(RandomCollection<PersuasionType> userSusceptibilityScores) {
         super(userSusceptibilityScores);
@@ -32,16 +30,19 @@ public class RandomTimedMessagesGenerator extends AbstractTimedMessageGenerator 
             PersuasiveMessage per_message = msg_gen.generateMessage(getRandomActivity());
 
             if(plus) {
+                Calendar cal = Calendar.getInstance();
+                cal.set(Calendar.HOUR_OF_DAY, hour);
+                cal.set(Calendar.MINUTE, time_offset_minutes);
 
-                TimedMessage message = new TimedMessage(
-                        hour * HOUR_IN_MILLI + time_offset_minutes * MIN_IN_MILLI,
-                        per_message);
+                TimedMessage message = new TimedMessage(cal.getTimeInMillis(), per_message);
                 messages.add(message);
             }
             else {
-                TimedMessage message = new TimedMessage(
-                        hour * HOUR_IN_MILLI - time_offset_minutes * MIN_IN_MILLI,
-                        per_message);
+                Calendar cal = Calendar.getInstance();
+                cal.set(Calendar.HOUR_OF_DAY, hour);
+                cal.set(Calendar.MINUTE, time_offset_minutes);
+
+                TimedMessage message = new TimedMessage(cal.getTimeInMillis(), per_message);
                 messages.add(message);
             }
 

@@ -134,7 +134,7 @@ public class MainActivity extends ActionBarActivity {
         // TODO: bepalen wanneer de gebruiker is begonnen met de studie?
         //int startDay = 24;
         //Calendar cal = Calendar.getInstance();
-        /*
+
         if(cal.get(Calendar.DAY_OF_YEAR) <= (cal.get(Calendar.DAY_OF_YEAR) + 7))
         {
             // Eerste week -> willekeurige berichten
@@ -152,22 +152,22 @@ public class MainActivity extends ActionBarActivity {
                 timedMessages = generator.generateTimedMessages(storyLine, calendarEvents);
             }
         }
-        */
+
         // Om berichten uit te testen.
-
-        Calendar c = Calendar.getInstance();
-        long time_test_msg = c.getTimeInMillis() + 10000; // nu + 10 seconden.
-        PersuasivePart pp = new PersuasivePart("Iedereen weet dat iPedometer het beste is.", PersuasionType.AUTHORITY);
-        PersuasiveMessage p_msg = new PersuasiveMessage(pp, "Gebruik de app daarom nu!");
-
-        System.out.println("Test bericht: "+p_msg);
-
-        timedMessages.add(new TimedMessage(time_test_msg, p_msg));
-
-
-        sendMessagesNewest(timedMessages, email);
-
         /*
+            Calendar c = Calendar.getInstance();
+            long time_test_msg = c.getTimeInMillis() + 10000; // nu + 10 seconden.
+            PersuasivePart pp = new PersuasivePart("Iedereen weet dat iPedometer het beste is.", PersuasionType.AUTHORITY);
+            PersuasiveMessage p_msg = new PersuasiveMessage(pp, "Gebruik de app daarom nu!");
+
+            System.out.println("Test bericht: "+p_msg);
+
+            timedMessages.add(new TimedMessage(time_test_msg, p_msg));
+        */
+
+        sendMessages(timedMessages, email);
+
+
         updateSteps();
 
         try {
@@ -188,7 +188,7 @@ public class MainActivity extends ActionBarActivity {
         }
         isToday = false;
         //CalendarIntegration ci = new CalendarIntegration(this);
-        */
+
     }
     private String[] dates = {"20150622", "20150623", "20150624", "20150625", "20150626", "20150627", "20150628", "20150629", "20150630", "20150701", "20150702", "20150703", "20150704", "20150705", "20150706", "20150707" ,"20150708", "20150709", "20150710"};
     private boolean isToday = false;
@@ -313,27 +313,7 @@ public class MainActivity extends ActionBarActivity {
         return calendarLoader.loadCalendar(startTime, endTime);
     }
 
-    private void sendMessagesNew(LinkedList<TimedMessage> timedMessages, String email) {
-
-        // source: http://karanbalkar.com/2013/07/tutorial-41-using-alarmmanager-and-broadcastreceiver-in-android/
-        for(TimedMessage m : timedMessages) {
-            Intent messageIntent = new Intent(this, MessageAlarmReceiver.class);
-            // Put the message in the intent so the MessageAlarmReceiver can route it to
-            // the MessageSendingService, which puts it in the notification.
-            messageIntent.putExtra("MESSAGE", m.getMessage().toString());
-            // For logging info when a button on the message dialog is pressed.
-            messageIntent.putExtra("EMAIL", email);
-
-            PendingIntent resultIntent = PendingIntent.getBroadcast(MainActivity.this, 0, messageIntent, 0);
-            // Set the notification to be sent at the right time using the alarm manager.
-            AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
-            alarmManager.set(AlarmManager.RTC, m.getTime(), resultIntent);
-
-            System.out.println("Bericht klaargemaakt om te verzenden: "+m);
-        }
-    }
-
-    private void sendMessagesNewest(LinkedList<TimedMessage> timedMessages, String email) {
+    private void sendMessages(LinkedList<TimedMessage> timedMessages, String email) {
         for(TimedMessage m : timedMessages) {
             // Set the notification to be sent at the right time using the alarm manager.
             AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
@@ -434,55 +414,5 @@ public class MainActivity extends ActionBarActivity {
         }
     }
 
-    public class ServerTask extends AsyncTask<Void, Void, Boolean>{
-
-        private String tmp_access_token;
-        private double[] tmp_userWeights;
-        private RandomCollection<PersuasionType> tmp_userScores;
-        private AbstractTimedMessageGenerator tmp_generator;
-        private Boolean tmp_random;
-
-        public ServerTask() {
-            tmp_userScores = new RandomCollection<>();
-        }
-
-        @Override
-        protected Boolean doInBackground(Void... params) {
-            tmp_access_token = server.getAccessToken(email);
-            tmp_userWeights = server.getEnqueteWeights(email);
-            tmp_random = server.isControlGroup(email);
-
-            tmp_userScores.add(tmp_userWeights[0], PersuasionType.AUTHORITY);
-            tmp_userScores.add(tmp_userWeights[1], PersuasionType.COMMITMENT);
-            tmp_userScores.add(tmp_userWeights[2], PersuasionType.CONSENSUS);
-            tmp_userScores.add(tmp_userWeights[3], PersuasionType.SCARCITY);
-
-            if (access_token==null || userWeights==null || userScores==null || generator==null) {
-                return false;
-            }
-            return true;
-        }
-
-        @Override
-        protected void onPostExecute(Boolean object) {
-            access_token = tmp_access_token;
-            userWeights = tmp_userWeights;
-            userScores = tmp_userScores;
-            random = tmp_random;
-
-            if (random) {
-                generator = new RandomTimedMessagesGenerator(userScores);
-            }
-            else {
-                generator = new TimedMessagesGenerator(userScores);
-            }
-        }
-
-        @Override
-        protected void onCancelled() {
-
-        }
-
-    }
 
 }

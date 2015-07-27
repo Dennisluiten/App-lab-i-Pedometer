@@ -2,6 +2,8 @@ package iPedometer3;
 
 import com.example.erikeppenhof.myapplication.MainActivity;
 
+import java.util.Calendar;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.ListIterator;
 import java.util.Random;
@@ -27,6 +29,15 @@ public class TimedMessagesGenerator extends AbstractTimedMessageGenerator {
         super(userSusceptibilityScores);
     }
 
+    private long setToToday(long oldTime) {
+        Calendar cal = Calendar.getInstance();
+        Calendar now = Calendar.getInstance();
+
+        cal.setTimeInMillis(oldTime);
+        cal.set(Calendar.DAY_OF_YEAR, now.get(Calendar.DAY_OF_YEAR));
+        return cal.getTimeInMillis();
+    }
+
     public LinkedList<TimedMessage> generateTimedMessages(
             LinkedList<MovesBlock> movesBlocks, LinkedList<CalendarEvent> calendarEvents)
     {
@@ -34,6 +45,11 @@ public class TimedMessagesGenerator extends AbstractTimedMessageGenerator {
 
         for(MovesBlock mb : movesBlocks)
         {
+            // Zet de datum naar vandaag, maar behoud de tijd.
+            // (Movesblok is van een week geleden, maar de berichten
+            //  moeten vandaag verstuurd worden).
+            mb.setStartTime(setToToday(mb.getStartTime()));
+            mb.setEndTime(setToToday(mb.getEndTime()));
             // Check wanneer er berichten verstuurd kunnen worden
             // en voeg deze toe aan de te versturen berichten.
             betweenEventsMessage(mb, messages, calendarEvents);
