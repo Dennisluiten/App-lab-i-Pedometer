@@ -17,6 +17,7 @@ import android.widget.TextView;
 
 import org.json.JSONException;
 
+import java.sql.Time;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -135,19 +136,30 @@ public class MainActivity extends ActionBarActivity {
         //int startDay = 24;
         //Calendar cal = Calendar.getInstance();
 
+        GeneratorTask generatorTask = new GeneratorTask();
+        generatorTask.execute();
+
+        while(generator == null) {
+            Log.d("Gekkigheid", "Hier gaat het fout");
+        }
+
         if(cal.get(Calendar.DAY_OF_YEAR) <= (cal.get(Calendar.DAY_OF_YEAR) + 7))
         {
+            Log.d("Gekkigheid", "Test1");
             // Eerste week -> willekeurige berichten
+            generator = new RandomTimedMessagesGenerator(userScores);
             timedMessages = generator.generateTimedMessages(storyLine, calendarEvents);
         }
         else
         {
             // Tweede week
-            if(!random) {
+            if(random) {
                 // Gebruiker zit in controlegroep, ga door met willekeurige berichten sturen.
+                generator = new RandomTimedMessagesGenerator(userScores);
                 timedMessages = generator.generateTimedMessages(storyLine, calendarEvents);
             }
             else {
+                generator = new TimedMessagesGenerator(userScores);
                 // Gebruiker zit in 'echte' groep, stuur getimede berichten.
                 timedMessages = generator.generateTimedMessages(storyLine, calendarEvents);
             }
@@ -190,7 +202,7 @@ public class MainActivity extends ActionBarActivity {
         //CalendarIntegration ci = new CalendarIntegration(this);
 
     }
-    private String[] dates = {"20150622", "20150623", "20150624", "20150625", "20150626", "20150627", "20150628", "20150629", "20150630", "20150701", "20150702", "20150703", "20150704", "20150705", "20150706", "20150707" ,"20150708", "20150709", "20150710"};
+    private String[] dates = {"20150724", "20150725", "20150726", "20150727"};
     private boolean isToday = false;
 
     public void saveStepsToDatabase(MovesLoader ml) throws JSONException, InterruptedException, ParseException {
@@ -209,6 +221,7 @@ public class MainActivity extends ActionBarActivity {
                     isToday = true;
                 }
                 steps = ml.amountSteps(dates[i]);
+                Log.d("MAINACTIVITYTIJDTEST", dates[i]);
                 start = ml.getTime(dates[i], "startTime");
                 end = ml.getTime(dates[i], "endTime");
             }
@@ -221,9 +234,8 @@ public class MainActivity extends ActionBarActivity {
                 Timestamp st = new Timestamp(date_st.getTime());
                 Date date_et = changeFormat.parse(end.get(i));
                 Timestamp et = new Timestamp(date_et.getTime());
-                if (!(server.stepsTakenBetween(this.getIntent().getStringExtra("email"), st, et) > 0)) {
-                    server.sendStepLog(this.getIntent().getStringExtra("email"), steps.get(i), st, et);
-                }
+                StepsTask stepsTask = new StepsTask();
+                stepsTask.execute(this.getIntent().getStringExtra("email"), st, et, steps.get(i));
             }
         }
     }
@@ -414,5 +426,35 @@ public class MainActivity extends ActionBarActivity {
         }
     }
 
+    private class GeneratorTask extends AsyncTask<Void, Void, Void> {
+
+        public GeneratorTask() {
+
+        }
+
+        protected Void doInBackground(Void... params) {
+            if (random) {
+                generator = new RandomTimedMessagesGenerator(userScores);
+            }
+            else {
+                generator = new TimedMessagesGenerator(userScores);
+            }
+            return null;
+        }
+    }
+
+    private class StepsTask extends AsyncTask<Object, Void, Void> {
+        public StepsTask() {
+
+        }
+
+        protected Void doInBackground(Object... params) {
+            if (!(server.stepsTakenBetween((String) params[0], (Timestamp) params[1], (Timestamp) params[2]) > 0)) {
+                server.sendStepLog((String) params[0], (int) params[3], (Timestamp) params[1], (Timestamp) params[2]);
+            }
+            return null;
+        }
+
+    }
 
 }

@@ -7,11 +7,13 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v4.app.NotificationCompat;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 
@@ -98,24 +100,44 @@ public class NotificationActivity extends ActionBarActivity {
         builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int id) {
-                server.messageSent(email, notification, -1, currentTimestamp);
+                ButtonTask buttonTask = new ButtonTask();
+                buttonTask.execute(email, notification, -1, currentTimestamp);
             }
         });
         builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int id) {
-                server.messageSent(email, notification, 0, currentTimestamp);
+                ButtonTask buttonTask = new ButtonTask();
+                buttonTask.execute(email, notification, 0, currentTimestamp);
             }
         });
         builder.setNeutralButton(R.string.snooze, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int id) {
                 // Snooze
-                server.messageSent(email, notification, 1, currentTimestamp);
+                ButtonTask buttonTask = new ButtonTask();
+                buttonTask.execute(email, notification, 1, currentTimestamp);
 
                 mHandler.sendEmptyMessageDelayed(DISPLAY_DATA, snoozetime);
             }
         });
+
         return builder.create();
     }
+
+    private class ButtonTask extends AsyncTask<Object, Integer, Void> {
+
+        public ButtonTask() {
+
+        }
+
+        @Override
+        protected Void doInBackground(Object... params) {
+            Log.d("NotificationActivityBLA", Integer.toString(params.length));
+            server.messageSent((String) params[0], (String) params[1], (int) params[2], (Timestamp) params[3]);
+            return null;
+        }
+
+    }
+
 }

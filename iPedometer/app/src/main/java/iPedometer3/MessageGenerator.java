@@ -1,9 +1,12 @@
 package iPedometer3;
 
+import android.os.AsyncTask;
+
 import com.example.erikeppenhof.myapplication.MainApp;
 
 import java.util.LinkedList;
 import java.util.Random;
+import java.util.concurrent.ExecutionException;
 
 /**
  * Generates messages based on a user's susceptibility
@@ -39,37 +42,24 @@ public class MessageGenerator {
 
     private void loadMessages()
     {
-        /*
-        consensusMessages.add(
-                new PersuasivePart("Minder dan 10% van de mensen is inactief.",
-                        PersuasionType.CONSENSUS));
-        authorityMessages.add(
-                new PersuasivePart("Volgens Thuisarts.nl maakt bewegen je spieren en botten sterker.",
-                        PersuasionType.AUTHORITY));
-        scarcityMessages.add(
-                new PersuasivePart("Per dag is er maar één kans om meer te bewegen. Neem die kans vandaag!",
-                        PersuasionType.SCARCITY));
-        commitmentMessages.add(
-                new PersuasivePart("Probeer je aan je doel te houden om gezonder te leven door meer te bewegen. Zet nog een tandje bij!",
-                        PersuasionType.COMMITMENT));
-        funnyMessages.add(
-                new PersuasivePart("Drink veel water waardoor je vaak naar het toilet moet; het liefst op een andere verdieping.",
-                        PersuasionType.FUNNY));
-        */
+        LoadMessagesTask lmg = new LoadMessagesTask();
+        try {
+            LinkedList<PersuasivePart>[] all_messages = lmg.execute().get();
 
-        LinkedList<PersuasivePart>[] all_messages = server.getAllMessages();
-
-        for(PersuasivePart part : all_messages[0])
-            authorityMessages.add(part);
-        for(PersuasivePart part : all_messages[1])
-            commitmentMessages.add(part);
-        for(PersuasivePart part : all_messages[2])
-            consensusMessages.add(part);
-        for(PersuasivePart part : all_messages[3])
-            funnyMessages.add(part);
-        for(PersuasivePart part : all_messages[4])
-            scarcityMessages.add(part);
-
+            for (PersuasivePart part : all_messages[0])
+                authorityMessages.add(part);
+            for (PersuasivePart part : all_messages[1])
+                commitmentMessages.add(part);
+            for (PersuasivePart part : all_messages[2])
+                consensusMessages.add(part);
+            for (PersuasivePart part : all_messages[3])
+                funnyMessages.add(part);
+            for (PersuasivePart part : all_messages[4])
+                scarcityMessages.add(part);
+        }
+        catch(Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public PersuasiveMessage generateMessage(String activityPart)
@@ -107,5 +97,16 @@ public class MessageGenerator {
         int randomIndex = random.nextInt(funnyMessages.size());
         PersuasivePart msg = funnyMessages.get(randomIndex);
         return new PersuasiveMessage(msg, "");
+    }
+
+    private class LoadMessagesTask extends AsyncTask<Void, Void, LinkedList<PersuasivePart>[]> {
+
+        public LoadMessagesTask() {
+
+        }
+
+        protected LinkedList<PersuasivePart>[] doInBackground(Void... params) {
+            return server.getAllMessages();
+        }
     }
 }
