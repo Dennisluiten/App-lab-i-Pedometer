@@ -141,16 +141,8 @@ public class MainActivity extends ActionBarActivity {
         movesLoader = new MovesLoader(access_token);
         LinkedList<MovesBlock> storyLine = loadMovesData(movesLoader);
 
-        GeneratorTask generatorTask = new GeneratorTask();
-        generatorTask.execute();
-
-        while(generator == null) {
-            Log.d("Gekkigheid", "Hier gaat het fout");
-        }
-
         if(cal.get(Calendar.DAY_OF_YEAR) <= startDay + 7)
         {
-            Log.d("Gekkigheid", "Test1");
             // Eerste week -> willekeurige berichten
             generator = new RandomTimedMessagesGenerator(userScores);
             timedMessages = generator.generateTimedMessages(storyLine, calendarEvents);
@@ -164,8 +156,8 @@ public class MainActivity extends ActionBarActivity {
                 timedMessages = generator.generateTimedMessages(storyLine, calendarEvents);
             }
             else {
-                generator = new TimedMessagesGenerator(userScores);
                 // Gebruiker zit in 'echte' groep, stuur getimede berichten.
+                generator = new TimedMessagesGenerator(userScores);
                 timedMessages = generator.generateTimedMessages(storyLine, calendarEvents);
             }
         }
@@ -428,23 +420,6 @@ public class MainActivity extends ActionBarActivity {
 
         protected Boolean doInBackground(Void... params) {
             return server.isControlGroup(email);
-        }
-    }
-
-    private class GeneratorTask extends AsyncTask<Void, Void, Void> {
-
-        public GeneratorTask() {
-
-        }
-
-        protected Void doInBackground(Void... params) {
-            if (random) {
-                generator = new RandomTimedMessagesGenerator(userScores);
-            }
-            else {
-                generator = new TimedMessagesGenerator(userScores);
-            }
-            return null;
         }
     }
 
