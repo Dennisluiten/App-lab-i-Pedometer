@@ -11,7 +11,12 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.net.UnknownHostException;
 import java.sql.Timestamp;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.Locale;
 
@@ -178,6 +183,22 @@ public class ServerConnector implements ServerInterface {
             return false;
         else
             return true;
+    }
+
+    @Override
+    public int getStartDay(String userEmail) {
+        String dateString = queryString(String.format("SELECT studyStartTime FROM users WHERE email = '%s' LIMIT 1;", userEmail));
+        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.S");
+        try {
+            Date date = dateFormat.parse(dateString);
+            Calendar cal = Calendar.getInstance();
+            cal.setTime(date);
+            return cal.get(Calendar.DAY_OF_YEAR);
+        }
+        catch(ParseException e) {
+            e.printStackTrace();
+            return 0;
+        }
     }
 
     @Override

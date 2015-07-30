@@ -74,8 +74,6 @@ public class MainActivity extends ActionBarActivity {
 
         LinkedList<TimedMessage> timedMessages = new LinkedList<>();
 
-        // TODO: bepalen wanneer de gebruiker is begonnen met de studie?
-        int startDay = 24;
         Calendar cal = Calendar.getInstance();
 
         System.out.println("Laad stuff van eigen server...");
@@ -127,14 +125,21 @@ public class MainActivity extends ActionBarActivity {
             e.printStackTrace();
         }
 
+        // Laad de dag waarop de gebruiker is gestart met de studie.
+        int startDay = 0;
+        LoadStartStudyTask loadStartStudyTask  = new LoadStartStudyTask();
+        try {
+            startDay = loadStartStudyTask.execute().get();
+            System.out.println("day user started (day of year) = "+startDay);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+
         System.out.println("Laad Moves data van Moves server...");
 
         movesLoader = new MovesLoader(access_token);
         LinkedList<MovesBlock> storyLine = loadMovesData(movesLoader);
-
-        // TODO: bepalen wanneer de gebruiker is begonnen met de studie?
-        //int startDay = 24;
-        //Calendar cal = Calendar.getInstance();
 
         GeneratorTask generatorTask = new GeneratorTask();
         generatorTask.execute();
@@ -143,7 +148,7 @@ public class MainActivity extends ActionBarActivity {
             Log.d("Gekkigheid", "Hier gaat het fout");
         }
 
-        if(cal.get(Calendar.DAY_OF_YEAR) <= (cal.get(Calendar.DAY_OF_YEAR) + 7))
+        if(cal.get(Calendar.DAY_OF_YEAR) <= startDay + 7)
         {
             Log.d("Gekkigheid", "Test1");
             // Eerste week -> willekeurige berichten
@@ -455,6 +460,14 @@ public class MainActivity extends ActionBarActivity {
             return null;
         }
 
+    }
+
+    private class LoadStartStudyTask extends AsyncTask<Void, Void, Integer> {
+
+        protected Integer doInBackground(Void... params)
+        {
+            return server.getStartDay(email);
+        }
     }
 
 }
